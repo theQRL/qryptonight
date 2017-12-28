@@ -1,0 +1,4 @@
+include README.pypi LICENSE
+global-include CMakeLists.txt CMakeLists.txt.gtest.in *.cmake
+recursive-include src *
+recursive-include deps/xmr-stak *
