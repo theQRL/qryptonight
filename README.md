@@ -1,0 +1,2 @@
+# pycryptonight
+Python Wrapper for Cryptonight (derived from xmr-stak)
