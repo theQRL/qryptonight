@@ -20,34 +20,27 @@
   * of this Program grant you additional permission to convey the resulting work.
   *
   */
-#include <iostream>
-#include <qryptonight/qryptonight.h>
-#include "gtest/gtest.h"
 
-namespace {
-    TEST(QryptoNight, Init) {
-        Qryptonight qn;
-        EXPECT_TRUE(qn.isValid());
-    }
+#ifndef QRYPTONIGHT_QRYPTOMINER_H
+#define QRYPTONIGHT_QRYPTOMINER_H
 
-    TEST(QryptoNight, RunSingleHash) {
-        Qryptonight qn;
-        EXPECT_TRUE(qn.isValid());
+#include "qryptonight.h"
 
-        std::vector<uint8_t> input {
-                0x03, 0x05, 0x07, 0x09
-        };
+class Qryptominer {
+public:
+    Qryptominer();
+    virtual ~Qryptominer();
 
-        std::vector<uint8_t> output_expected {
-                0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
-                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
-                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
-                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
-        };
+    void setInput(std::vector<uint8_t> input, size_t nonce_offset, std::vector<uint8_t> difficulty);
 
-        auto output = qn.hash(input);
+    void start(uint8_t thread_count);
 
-        EXPECT_EQ(output_expected, output);
-    }
+    void cancel();
 
-}
+    virtual void solution_found(uint32_t nonce) {};
+
+protected:
+    Qryptonight _qn;
+};
+
+#endif //QRYPTONIGHT_QRYPTOMINER_H

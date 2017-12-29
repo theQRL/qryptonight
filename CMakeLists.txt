@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 
-set(CMAKE_VERBOSE_MAKEFILE FALSE)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_ERROR_DEPRECATED FALSE)
 set(CMAKE_WARN_DEPRECATED FALSE)
 
@@ -190,6 +190,9 @@ if (BUILD_PYTHON)
     set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing")
     message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
     message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+    # Enable threading in the wrapper (useful for GIL-safe callbacks)
+    set( CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-threads" )
 
     # Intentionally use a deprecated version to provide support for the raspberry pi
     SWIG_ADD_MODULE(pyqryptonight
