@@ -20,11 +20,49 @@
   * of this Program grant you additional permission to convey the resulting work.
   *
   */
-#include <iostream>
-#include "gtest/gtest.h"
+#pragma once
 
-namespace {
-    TEST(QryptoNight, Dummy) {
-        EXPECT_EQ(1, 1);
-    }
-}
+#include "xmrstak/misc/environment.hpp"
+#include "xmrstak/params.hpp"
+
+#include <cstdlib>
+#include <string>
+
+
+class jconf
+{
+public:
+	static jconf* inst()
+	{
+		auto& env = xmrstak::environment::inst();
+		if(env.pJconfConfig == nullptr)
+			env.pJconfConfig = new jconf;
+		return env.pJconfConfig;
+	};
+
+	enum slow_mem_cfg {
+		always_use,
+		no_mlck,
+		print_warning,
+		never_use,
+		unknown_value
+	};
+
+	const std::string GetCurrency();
+	bool IsCurrencyMonero();
+
+	inline bool HaveHardwareAes() { return bHaveAes; }
+
+	static void cpuid(uint32_t eax, int32_t ecx, int32_t val[4]);
+
+	slow_mem_cfg GetSlowMemSetting();
+
+private:
+	jconf();
+
+	bool check_cpu_features();
+	struct opaque_private;
+	opaque_private* prv;
+
+	bool bHaveAes;
+};

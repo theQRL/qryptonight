@@ -21,3 +21,33 @@
   *
   */
 
+#include <xmrstak/backend/cpu/crypto/cryptonight.h>
+#include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
+#include "qryptonight.h"
+
+Qryptonight::Qryptonight()
+{
+    // This settings are global. The dependency might need some refactoring
+    auto res = cryptonight_init(1, 1, &_last_msg);
+
+    _context = cryptonight_alloc_ctx(1, 1, &_last_msg);
+}
+
+Qryptonight::~Qryptonight()
+{
+    if (_context!= nullptr)
+    {
+        cryptonight_free_ctx(_context);
+    }
+}
+
+std::array<uint8_t, 32> Qryptonight::hash(std::vector<uint8_t> input)
+{
+    std::array<uint8_t, 32> output;
+
+    cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
+                                                                            output.data(),
+                                                                            _context);
+
+    return output;
+};

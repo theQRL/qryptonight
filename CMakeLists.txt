@@ -30,10 +30,51 @@ if (BUILD_PYTHON OR BUILD_GO)
     unset(SWIG_LANG_TYPE)
 endif ()
 
+################################################################################
+# Find hwloc
+################################################################################
+option(HWLOC_ENABLE "Enable or disable the requirement of hwloc" ON)
+if(HWLOC_ENABLE)
+    find_path(HWLOC_INCLUDE_DIR
+            NAMES
+            hwloc.h
+            PATHS
+            /opt/local
+            /usr/local
+            /usr
+            ENV "PROGRAMFILES(X86)"
+            ENV "HWLOC_ROOT"
+            PATH_SUFFIXES
+            include)
+
+    find_library(HWLOC
+            NAMES
+            libhwloc.lib
+            hwloc
+            PATHS
+            ENV "HWLOC_ROOT"
+            PATH_SUFFIXES
+            lib)
+
+    if(HWLOC STREQUAL "HWLOC-NOTFOUND" OR ${HWLOC_INCLUDE_DIR} STREQUAL "HWLOC_INCLUDE_DIR-NOTFOUND")
+        message(FATAL_ERROR "hwloc NOT found: use `-DHWLOC_ENABLE=OFF` to build without hwloc support")
+    else()
+        set(REF_CRYPTONIGHT_LIBS ${REF_CRYPTONIGHT_LIBS} ${HWLOC})
+        include_directories(AFTER ${HWLOC_INCLUDE_DIR})
+    endif()
+else()
+    add_definitions("-DCONF_NO_HWLOC")
+endif()
+
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_C_FLAGS "-march=native -mtune=native ${CMAKE_C_FLAGS}")
+endif()
+
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/api
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak
 )
 
 file(GLOB LIB_QRYPTONIGHT_INCLUDES
@@ -43,16 +84,28 @@ file(GLOB LIB_QRYPTONIGHT_INCLUDES
 file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/src/qryptonight/*.cpp")
 
-file(GLOB TEST_QRYPTONIGHT_SRC
+file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
-set(REF_CRYPTONIGHT_SRC
+file(GLOB REF_CRYPTONIGHT_SRC
+#        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/jconf.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/hwlocMemory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/console.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/utility.cpp
         )
 
-# Forcing XMSS to be compiled as C++
+file(GLOB REF_CRYPTONIGHT_C_SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c )
+
 SET_SOURCE_FILES_PROPERTIES(${LIB_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
 SET_SOURCE_FILES_PROPERTIES(${TEST_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
+
+# Compile C files as a static lib
+add_library(cryptonight-c-lib STATIC
+        ${REF_CRYPTONIGHT_C_SRC}
+        )
+set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)
 
 if (BUILD_TESTS)
     message(STATUS "GTests enabled")
@@ -99,12 +152,18 @@ if (BUILD_TESTS)
     add_executable(qryptonight_test
             ${TEST_QRYPTONIGHT_SRC}
             ${LIB_QRYPTONIGHT_SRC}
+            ${REF_CRYPTONIGHT_SRC}
             )
 
     target_include_directories( qryptonight_test PRIVATE
             ${LIB_QRYPTONIGHT_INCLUDES} )
 
-    target_link_libraries(qryptonight_test gtest_main)
+    target_link_libraries(qryptonight_test
+            gtest_main
+            ${REF_CRYPTONIGHT_LIBS}
+            cryptonight-c-lib
+            )
+
     add_test(gtest ${PROJECT_BINARY_DIR}/qryptonight_test)
 
 endif ()
