@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <array>
-#include <xmrstak/backend/cpu/crypto/cryptonight.h>
+#include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
 
 class Qryptonight {
 public:
