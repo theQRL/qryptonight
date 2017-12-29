@@ -213,7 +213,7 @@ if (BUILD_PYTHON)
             COMMENT "Moving SWIG files to output dir"
             COMMAND ${CMAKE_COMMAND} -E
             copy_if_different $<TARGET_FILE:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
-            ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
+            ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
             )
 
     add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
@@ -222,40 +222,6 @@ if (BUILD_PYTHON)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/pyqryptonight.py
             )
 
-endif ()
-
-# SWIG + API - Golang related stuff
-if (BUILD_GO)
-    set(SWIG_INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qrl.i)
-
-    message(STATUS "golang wrapper enabled")
-    set(language go)
-    #find_package(go 1.5 REQUIRED)
-    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
-    set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/goqrllib)
-    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
-    set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing" "-intgosize" "64")
-
-    SWIG_ADD_MODULE(goqrllib
-            ${language}
-            ${SWIG_INTERFACE}
-            src/api/api.cxx
-            ${LIB_SRC}
-            ${LIBXMSSALT_SRC}
-            )
-
-    SWIG_LINK_LIBRARIES(goqrllib
-            ${SWIG_LANG_LIBRARIES}
-            pyqrllib/dilithium
-            pyqrllib/kyber)
-
-    add_custom_command(TARGET ${SWIG_MODULE_goqrllib_REAL_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan $<TARGET_FILE:${SWIG_MODULE_goqrllib_REAL_NAME}>
-            COMMENT "Moving SWIG files to output dir"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:${SWIG_MODULE_goqrllib_REAL_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}/goqrllib
-            )
 endif ()
 
 if (BUILD_WEBASSEMBLY)
