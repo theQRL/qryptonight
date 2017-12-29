@@ -25,12 +25,6 @@ namespace std {
   %template(_string_list_list) vector<vector<unsigned char>>;
 }
 
-%shared_ptr(XmssBase)
-%shared_ptr(Xmss)
-%shared_ptr(XmssFast)
-
-// %array_functions(uint32_t, uint32ArrayRaw)
-
 %module pyqryptonight
 %{
     #include "qryptonight/qryptonight.h"

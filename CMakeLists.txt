@@ -201,6 +201,7 @@ if (BUILD_PYTHON)
 
     SWIG_LINK_LIBRARIES(pyqryptonight
             ${SWIG_LANG_LIBRARIES}
+            ${REF_CRYPTONIGHT_LIBS}
             cryptonight-c-lib)
 
     include_directories(

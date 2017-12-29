@@ -40,3 +40,8 @@ pyqryptonight\.egg-info/
 /.eggs/
 
 pyqryptonight/pyqryptonight\.py
+
+tests/python/coverage\.xml
+
+tests/python/\.coverage
+/.cache/
