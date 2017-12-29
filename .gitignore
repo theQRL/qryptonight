@@ -34,3 +34,7 @@
 \.idea/
 
 cmake-build-debug/
+
+pyqryptonight\.egg-info/
+/build/
+/.eggs/

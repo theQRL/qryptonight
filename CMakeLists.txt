@@ -15,7 +15,7 @@ set(CMAKE_WARN_DEPRECATED FALSE)
 
 set(BUILD_TESTS ON CACHE BOOL "Enables tests")
 set(BUILD_GO OFF CACHE BOOL "Enables go wrapper")
-set(BUILD_PYTHON OFF CACHE BOOL "Enables python wrapper")
+set(BUILD_PYTHON ON CACHE BOOL "Enables python wrapper")
 set(BUILD_PYTHON_LOCALDEPLOY OFF CACHE BOOL "Deploys python locally")
 set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
@@ -181,10 +181,10 @@ if (BUILD_PYTHON)
     include_directories(
           ${PYTHON_INCLUDE_PATH}
     )
-    set(CMAKE_SWIG_OUTDIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqrllib)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqrllib)
+    set(CMAKE_SWIG_OUTDIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqryptonight)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqryptonight)
 
-    set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qrl.i)
+    set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qryptonight.i)
     set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
     set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
     set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing")
@@ -192,108 +192,34 @@ if (BUILD_PYTHON)
     message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
     # Intentionally use a deprecated version to provide support for the raspberry pi
-    # Basic pyqrllib - Xmss, etc.
-    SWIG_ADD_MODULE(pyqrllib
+    SWIG_ADD_MODULE(pyqryptonight
             ${language}
             ${SWIG_INTERFACE}
-            ${LIB_QRL_SRC}
-            ${LIBXMSSALT_SRC}
+            ${LIB_QRYPTONIGHT_SRC}
+            ${REF_CRYPTONIGHT_SRC}
             )
 
-    SWIG_LINK_LIBRARIES(pyqrllib
-            ${SWIG_LANG_LIBRARIES})
+    SWIG_LINK_LIBRARIES(pyqryptonight
+            ${SWIG_LANG_LIBRARIES}
+            cryptonight-c-lib)
 
     include_directories(
             ${PYTHON_INCLUDE_PATH}
-            ${LIB_QRL_INCLUDES}
+            ${LIB_QRYPTONIGHT_INCLUDES}
     )
 
-    add_custom_command(TARGET ${SWIG_MODULE_pyqrllib_REAL_NAME}
+    add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
             POST_BUILD
             COMMENT "Moving SWIG files to output dir"
             COMMAND ${CMAKE_COMMAND} -E
-            copy_if_different $<TARGET_FILE:${SWIG_MODULE_pyqrllib_REAL_NAME}>
-            ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqrllib_REAL_NAME}>
+            copy_if_different $<TARGET_FILE:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
+            ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
             )
 
-    add_custom_command(TARGET ${SWIG_MODULE_pyqrllib_REAL_NAME}
+    add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
             POST_BUILD
             COMMENT ${swig_extra_generated_files}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/pyqrllib.py
-            )
-
-    ###################################################
-    # Dilithium
-    set(SWIG_INTERFACE src/api/dilithium.i)
-    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
-    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
-    set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing")
-    message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
-    message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-
-    set(SWIG_INTERFACE
-            src/api/dilithium.i)
-
-    include_directories(
-            ${PYTHON_INCLUDE_PATH}
-            ${LIB_DILITHIUM_INCLUDES}
-    )
-
-    SWIG_ADD_MODULE(dilithium
-            ${language}
-            ${SWIG_INTERFACE}
-            ${LIB_DILITHIUM_SRC}
-            ${REF_DILITHIUM_SRC}
-            )
-
-    SWIG_LINK_LIBRARIES(dilithium
-            ${SWIG_LANG_LIBRARIES})
-
-    add_custom_command(TARGET ${SWIG_MODULE_dilithium_REAL_NAME}
-            POST_BUILD
-            COMMENT "Moving SWIG files to output dir"
-            COMMAND ${CMAKE_COMMAND} -E
-            copy_if_different $<TARGET_FILE:${SWIG_MODULE_dilithium_REAL_NAME}>
-            ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_dilithium_REAL_NAME}>
-            )
-
-    add_custom_command(TARGET ${SWIG_MODULE_dilithium_REAL_NAME}
-            POST_BUILD
-            COMMENT ${swig_extra_generated_files}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/dilithium.py
-            )
-
-
-    # Kyber
-    set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/kyber.i)
-    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
-    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
-    set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing")
-    message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
-    message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-
-    SWIG_ADD_MODULE(kyber
-            ${language}
-            ${SWIG_INTERFACE}
-            ${LIB_KYBER_SRC}
-            ${REF_KYBER_SRC}
-            )
-
-    SWIG_LINK_LIBRARIES(kyber
-            ${SWIG_LANG_LIBRARIES})
-
-    add_custom_command(TARGET ${SWIG_MODULE_kyber_REAL_NAME}
-            POST_BUILD
-            COMMENT "Moving SWIG files to output dir"
-            COMMAND ${CMAKE_COMMAND} -E
-            copy_if_different $<TARGET_FILE:${SWIG_MODULE_kyber_REAL_NAME}>
-            ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_kyber_REAL_NAME}>
-            )
-
-    add_custom_command(TARGET ${SWIG_MODULE_kyber_REAL_NAME}
-            POST_BUILD
-            COMMENT ${swig_extra_generated_files}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqrllib/kyber.py
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/pyqryptonight.py
             )
 
 endif ()
