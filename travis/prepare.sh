@@ -6,10 +6,9 @@ echo "PLATFORM" ${PLATFORM}
 case "${TRAVIS_OS_NAME}" in
     osx)
         echo "OSX PREPARE"
-        brew install python3 swig
-        brew outdated boost || brew upgrade boost
+        brew install python3 swig hwloc
         brew outdated cmake || brew upgrade cmake
-        sudo pip3 install -U pip setuptools twine
+        sudo pip3 install -U pip setuptools
         ;;
 
     linux)
