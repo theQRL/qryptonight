@@ -25,22 +25,46 @@
 #define QRYPTONIGHT_QRYPTOMINER_H
 
 #include "qryptonight.h"
+#include <atomic>
+#include <thread>
+#include <mutex>
 
 class Qryptominer {
 public:
     Qryptominer();
     virtual ~Qryptominer();
 
-    void setInput(std::vector<uint8_t> input, size_t nonce_offset, std::vector<uint8_t> difficulty);
+    bool passesTarget(const std::vector<uint8_t> &hash);
 
-    void start(uint8_t thread_count);
+    void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
+
+    bool start(uint8_t thread_count);
+
+    bool isRunning();
+
+    bool solutionFound() { return _solution_found; }
+
+    uint32_t solutionNonce() { return _solution_nonce; }
+    std::vector<uint8_t> solutionInput() { return _solution_input; }
 
     void cancel();
 
-    virtual void solution_found(uint32_t nonce) {};
+    virtual void solutionEvent(uint32_t nonce);
 
 protected:
-    Qryptonight _qn;
+    void setNonce(std::vector<uint8_t> &input, uint32_t value);
+
+    std::vector<uint8_t> _input;
+    std::vector<uint8_t> _target;
+    size_t _nonceOffset;
+
+    std::vector<uint8_t> _solution_input;
+    uint32_t _solution_nonce;
+
+    std::atomic_bool _solution_found;
+    std::atomic_bool _stop_request;
+    std::vector<std::thread> _runningThreads;
+    std::mutex _solution_mutex;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H

@@ -51,13 +51,13 @@ jobs:
     - PLATFORM='xenial'
     script: "./travis/build.sh"
 
-  ######################## XENIAL-EMSCRIPTEN
-  - stage: build+test
-    os: linux
-    env:
-    - PLATFORM='xenial-emscripten'
-    script: "./travis/build.sh"
-
+#  ######################## XENIAL-EMSCRIPTEN
+#  - stage: build+test
+#    os: linux
+#    env:
+#    - PLATFORM='xenial-emscripten'
+#    script: "./travis/build.sh"
+#
 #  ######################## OSX + TESTS
 #  - stage: build+test
 #    os: osx

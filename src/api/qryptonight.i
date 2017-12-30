@@ -25,9 +25,14 @@ namespace std {
   %template(_string_list_list) vector<vector<unsigned char>>;
 }
 
-%module pyqryptonight
+%module(directors="1") pyqryptonight
 %{
     #include "qryptonight/qryptonight.h"
+    #include "qryptonight/qryptominer.h"
 %}
 
+%feature("director") Qryptominer;
+
 %include "qryptonight/qryptonight.h"
+%include "qryptonight/qryptominer.h"
+
