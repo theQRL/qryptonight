@@ -66,14 +66,14 @@ namespace {
                 0x03, 0x05, 0x07, 0x09
         };
 
-        std::array<uint8_t, 32> output_expected {
+        std::vector<uint8_t> output_expected {
                 0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
                 0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
                 0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
         };
 
-        std::array<uint8_t, 32> output;
+        std::vector<uint8_t> output(32);
 
         cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
                                                                                 output.data(),

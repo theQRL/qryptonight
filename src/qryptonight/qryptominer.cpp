@@ -105,6 +105,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
                 }
             }, i, thread_count));
     }
+    return true;
 }
 
 bool Qryptominer::isRunning()
