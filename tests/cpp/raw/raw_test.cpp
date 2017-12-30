@@ -29,17 +29,17 @@ namespace {
     TEST(Xmr_stak, Init) {
         alloc_msg msg = { nullptr };
 
-        size_t res = cryptonight_init(1, 1, &msg);
+        size_t res = cryptonight_init(0, 1, &msg);
         EXPECT_EQ(1, 1);
     }
 
     TEST(Xmr_stak, CreateContext) {
         alloc_msg msg = { nullptr };
 
-        auto res = cryptonight_init(1, 1, &msg);
+        auto res = cryptonight_init(0, 1, &msg);
         EXPECT_EQ(1, res);
 
-        auto context = cryptonight_alloc_ctx(1, 1, &msg);
+        auto context = cryptonight_alloc_ctx(0, 1, &msg);
 
         EXPECT_NE(nullptr, context);
         if (context == nullptr)
@@ -53,10 +53,10 @@ namespace {
     TEST(Xmr_stak, RunSingleHash) {
         alloc_msg msg = { nullptr };
 
-        auto res = cryptonight_init(1, 1, &msg);
+        auto res = cryptonight_init(0, 1, &msg);
         EXPECT_EQ(1, res);
 
-        auto context = cryptonight_alloc_ctx(1, 1, &msg);
+        auto context = cryptonight_alloc_ctx(0, 1, &msg);
 
         EXPECT_NE(nullptr, context);
         if (context == nullptr)

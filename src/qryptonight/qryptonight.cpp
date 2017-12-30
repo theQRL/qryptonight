@@ -28,9 +28,9 @@
 Qryptonight::Qryptonight()
 {
     // This settings are global. The dependency might need some refactoring
-    auto res = cryptonight_init(1, 1, &_last_msg);
+    auto res = cryptonight_init(0, 1, &_last_msg);
 
-    _context = cryptonight_alloc_ctx(1, 1, &_last_msg);
+    _context = cryptonight_alloc_ctx(0, 1, &_last_msg);
 }
 
 Qryptonight::~Qryptonight()
