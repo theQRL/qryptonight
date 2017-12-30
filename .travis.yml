@@ -22,26 +22,26 @@ addons:
 ########################
 jobs:
   include:
-#  ######################## XENIAL - TESTS
-#  - stage: build+test
-#    os: linux
-#    env:
-#    - CMAKE_ARGS='-DBUILD_TESTS=ON'
-#    - TEST='TRUE'
-#    - CC_VER="5"
-#    - PLATFORM='xenial'
-#    script: "./travis/build.sh"
-#
-#  ######################## XENIAL - Python
-#  - stage: build+test
-#    os: linux
-#    env:
-#    - CMAKE_ARGS='-DBUILD_PYTHON=ON'
-#    - TEST='TRUE'
-#    - CC_VER="5"
-#    - PLATFORM='xenial'
-#    script: "./travis/build.sh"
-#
+  ######################## XENIAL - TESTS
+  - stage: build+test
+    os: linux
+    env:
+    - CMAKE_ARGS='-DBUILD_TESTS=ON'
+    - TEST='TRUE'
+    - CC_VER="5"
+    - PLATFORM='xenial'
+    script: "./travis/build.sh"
+
+  ######################## XENIAL - Python
+  - stage: build+test
+    os: linux
+    env:
+    - CMAKE_ARGS='-DBUILD_PYTHON=ON'
+    - TEST='TRUE'
+    - CC_VER="5"
+    - PLATFORM='xenial'
+    script: "./travis/build.sh"
+
 #  ######################## XENIAL-EMSCRIPTEN
 #  - stage: build+test
 #    os: linux
@@ -58,15 +58,15 @@ jobs:
 #    - TEST='TRUE'
 #    script:
 #    - "./travis/build.sh"
-#
-#  ######################## OSX
-#  - stage: build+test
-#    os: osx
-#    if: branch = master
-#    env:
-#    - CMAKE_ARGS='-DBUILD_PYTHON=ON'
-#    script:
-#    - "./travis/build.sh"
+
+  ######################## OSX
+  - stage: build+test
+    os: osx
+    if: branch = master
+    env:
+    - CMAKE_ARGS='-DBUILD_PYTHON=ON'
+    script:
+    - "./travis/build.sh"
 #
 #  ########################
 #  - stage: test_deployment
