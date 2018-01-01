@@ -24,7 +24,7 @@ This library (derived from xmr-stak) currently exposes the following functionali
 
 #### Ubuntu
 ```
-sudo apt -y install swig3.0 python3-dev build-essential cmake libhwloc-dev
+sudo apt -y install swig3.0 python3-dev build-essential cmake libhwloc-dev libboost-dev
 pip3 install pyqryptonight
 ````
 
@@ -35,7 +35,7 @@ If you dont have brew yet, we think you should :) Install brew following the ins
 Now install some dependencies
 
 ```bash
-brew install cmake python3 swig hwloc
+brew install cmake python3 swig hwloc boost
 pip3 install pyqryptonight
 ```
 

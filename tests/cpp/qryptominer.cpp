@@ -73,7 +73,7 @@ namespace {
 
         qm.setInput(input, 0, target);
         qm.start(1);
-        sleep(1);
+        sleep(2);
 
         EXPECT_TRUE(qm.solutionFound());
         EXPECT_EQ(7, qm.solutionNonce());

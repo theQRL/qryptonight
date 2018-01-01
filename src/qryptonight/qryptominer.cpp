@@ -130,6 +130,6 @@ void Qryptominer::cancel()
 
 void Qryptominer::solutionEvent(uint32_t nonce)
 {
-    // Derive classes can override to receive a callback
+    // Derived classes can override to receive a callback
     std::cout << "Nonce: " << nonce << std::endl;
 }
