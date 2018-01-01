@@ -30,7 +30,7 @@ if (BUILD_PYTHON OR BUILD_GO)
     unset(SWIG_LANG_TYPE)
 endif ()
 
-FIND_PACKAGE(Boost 1.60)
+FIND_PACKAGE(Boost 1.58)
 
 ################################################################################
 # Find hwloc
