@@ -63,6 +63,22 @@ namespace {
         EXPECT_EQ(expected_boundary, boundary1);
     }
 
+    TEST(PoWHelper, BoundaryCalculationDifficulty2) {
+        PoWHelper ph;
+
+        auto difficulty = toByteVector(1000488);
+        auto boundary1 = ph.getBoundary(difficulty);
+
+        std::vector<uint8_t> expected_boundary{
+                0xF5, 0xF2, 0xF9, 0x1B, 0x39, 0x81, 0x48, 0x54,
+                0xA2, 0xBF, 0xC3, 0x31, 0xB5, 0xBF, 0xEF, 0xE6,
+                0xC3, 0xA2, 0xAE, 0x73, 0xF3, 0xC9, 0xD3, 0x45,
+                0xC0, 0xEB, 0x53, 0xDF, 0xC4, 0x10, 0x00, 0x00
+        };
+
+        EXPECT_EQ(expected_boundary, boundary1);
+    }
+
     TEST(PoWHelper, bignum_vector) {
         auto tmp = toByteVector(1000000);
         std::vector<uint8_t> expected {
@@ -77,6 +93,22 @@ namespace {
         auto tmp2 = fromByteVector(expected);
 
         EXPECT_EQ(1000000, tmp2);
+    }
+
+    TEST(PoWHelper, bignum_vector2) {
+        auto tmp = toByteVector(1000488);
+        std::vector<uint8_t> expected {
+                0x28, 0x44, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        EXPECT_EQ(expected, tmp);
+
+        auto tmp2 = fromByteVector(expected);
+
+        EXPECT_EQ(1000488, tmp2);
     }
 
     TEST(PoWHelper, DifficultyOne) {
