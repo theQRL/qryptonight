@@ -84,13 +84,15 @@ file(GLOB LIB_QRYPTONIGHT_INCLUDES
         )
 
 file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/qryptonight/*.cpp")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/misc/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/pow/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/qryptonight/*.cpp"
+        )
 
 file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
 file(GLOB REF_CRYPTONIGHT_SRC
-#        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/jconf.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/hwlocMemory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/console.cpp
@@ -236,28 +238,12 @@ if (BUILD_WEBASSEMBLY)
     set(JS_KYBINTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/jswrapper/jskybwrapper.cpp)
 
     message(STATUS "webassembly enabled")
-    add_library(jsqrl SHARED
+    add_library(jsqryptonight SHARED
             ${JS_QRL_INTERFACE}
-            ${LIB_QRL_SRC}
-            ${LIBXMSSALT_SRC}
+            ${LIB_QRYPTONIGHT_SRC}
+            ${REF_CRYPTONIGHT_SRC}
             )
-    target_include_directories( jsqrl PRIVATE
+    target_include_directories( jsqryptonight PRIVATE
             ${LIB_QRL_INCLUDES} )
-
-    add_library(jsdilithium SHARED
-            ${JS_DILITHIUM_INTERFACE}
-            ${LIB_KYBER_SRC}
-            ${LIBDILITHIUM_SRC}
-            )
-    target_include_directories( jsdilithium PRIVATE
-            ${LIB_DILITHIUM_INCLUDES} )
-
-    add_library(jskyber SHARED
-            ${JS_KYBER_INTERFACE}
-            ${LIB_KYBER_SRC}
-            ${LIBKYBER_SRC}
-            )
-    target_include_directories( jskyber PRIVATE
-            ${LIB_KYBER_INCLUDES} )
 
 endif ()

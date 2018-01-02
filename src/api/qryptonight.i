@@ -27,12 +27,14 @@ namespace std {
 
 %module(directors="1") pyqryptonight
 %{
+    #include "pow/powhelper.h"
     #include "qryptonight/qryptonight.h"
     #include "qryptonight/qryptominer.h"
 %}
 
 %feature("director") Qryptominer;
 
+%include "pow/powhelper.h"
 %include "qryptonight/qryptonight.h"
 %include "qryptonight/qryptominer.h"
 

@@ -25,12 +25,10 @@
 
 #include "xmrstak/misc/console.hpp"
 #include "xmrstak/misc/jext.hpp"
-#include "xmrstak/misc/utility.hpp"
 
 #include <cmath>
 #include <vector>
 #include <numeric>
-#include <algorithm>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp

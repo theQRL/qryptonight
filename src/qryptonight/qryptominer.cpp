@@ -23,7 +23,6 @@
 
 #include "qryptominer.h"
 #include <iostream>
-#include <Python.h>
 
 Qryptominer::Qryptominer()
 {
