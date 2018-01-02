@@ -116,32 +116,20 @@ namespace {
 
         std::vector<uint8_t> answer;
 
-        answer = ph.getDifficulty(105, 100, toByteVector(1000000) );
+        answer = ph.getDifficulty(155, 100, toByteVector(1000000) );
         EXPECT_EQ(toByteVector(1000488), answer);
 
-        answer = ph.getDifficulty(110, 100, toByteVector(1000000) );
+        answer = ph.getDifficulty(160, 100, toByteVector(1000000) );
         EXPECT_EQ(toByteVector(1000000), answer);
 
-        answer = ph.getDifficulty(120, 100, toByteVector(1000000) );
+        answer = ph.getDifficulty(170, 100, toByteVector(1000000) );
         EXPECT_EQ(toByteVector(999512), answer);
 
-        answer = ph.getDifficulty(130, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(999024), answer);
-
-        answer = ph.getDifficulty(140, 100, toByteVector(1000000) );
+        answer = ph.getDifficulty(180, 100, toByteVector(1000000) );
         EXPECT_EQ(toByteVector(998536), answer);
 
-//        answer = ph.getDifficulty(155, 100, 1000000 );
-//        EXPECT_EQ(1000488, answer);
-//
-//        answer = ph.getDifficulty(160, 100, 1000000 );
-//        EXPECT_EQ(1000000, answer);
-//
-//        answer = ph.getDifficulty(170, 100, 1000000 );
-//        EXPECT_EQ(999512, answer);
-//
-//        answer = ph.getDifficulty(180, 100, 1000000 );
-//        EXPECT_EQ(999024, answer);
+        answer = ph.getDifficulty(190, 100, toByteVector(1000000) );
+        EXPECT_EQ(toByteVector(997560), answer);
 
     }
 

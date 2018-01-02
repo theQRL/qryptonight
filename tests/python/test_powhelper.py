@@ -41,7 +41,7 @@ class TestPowHelper(TestCase):
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         )
 
-        current_difficulty = ph.getDifficulty(timestamp=105,
+        current_difficulty = ph.getDifficulty(timestamp=155,
                                               parent_timestamp=100,
                                               parent_difficulty=parent_difficulty)
 
