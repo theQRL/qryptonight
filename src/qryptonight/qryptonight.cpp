@@ -23,13 +23,26 @@
 
 #include <xmrstak/backend/cpu/crypto/cryptonight.h>
 #include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
+#include <iostream>
 #include "qryptonight.h"
 
 Qryptonight::Qryptonight()
 {
-    // This settings are global. The dependency might need some refactoring
-    auto res = cryptonight_init(0, 1, &_last_msg);
+    size_t init_res;
 
+    // First try fast mem
+    init_res = cryptonight_init(1, 1, &_last_msg);
+
+    if (init_res)
+    {
+        // get context
+        _context = cryptonight_alloc_ctx(1, 1, &_last_msg);
+        if (_context!= nullptr)
+            return;
+    }
+
+    // If something failed.. go for basic settings
+    init_res = cryptonight_init(0, 1, &_last_msg);
     _context = cryptonight_alloc_ctx(0, 1, &_last_msg);
 }
 
