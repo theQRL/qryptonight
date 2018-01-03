@@ -85,6 +85,36 @@ namespace {
         EXPECT_EQ(expected_winner, qm.solutionInput());
     }
 
+    TEST(Qryptominer, RunAndRestart) {
+        Qryptominer qm;
+
+        std::vector<uint8_t> input {
+                0x03, 0x05, 0x07, 0x09, 0x19
+        };
+
+        std::vector<uint8_t> target {
+                0x1E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
+                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
+                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
+                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
+        };
+
+        qm.setInput(input, 0, target);
+        qm.start(1);
+        qm.setInput(input, 0, target);
+        qm.start(1);
+        sleep(2);
+
+        EXPECT_TRUE(qm.solutionFound());
+        EXPECT_EQ(7, qm.solutionNonce());
+
+        std::vector<uint8_t> expected_winner {
+                0x07, 0x00, 0x00, 0x00, 0x19
+        };
+
+        EXPECT_EQ(expected_winner, qm.solutionInput());
+    }
+
     TEST(Qryptominer, SolutionRace) {
         Qryptominer qm;
 
