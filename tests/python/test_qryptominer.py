@@ -39,7 +39,7 @@ class TestQryptominer(TestCase):
         qm.start(thread_count=2)
 
         # Python can sleep or do something else.. the callback will happen in the background
-        time.sleep(1)
+        time.sleep(2)
 
         # This property has been just created in the python custom class when the event is received
         self.assertEqual(7, qm.python_nonce)

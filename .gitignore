@@ -47,3 +47,5 @@ tests/python/\.coverage
 /.cache/
 
 cmake-build-release/
+
+pyqryptonight/__pycache__/

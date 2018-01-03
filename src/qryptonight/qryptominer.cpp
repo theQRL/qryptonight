@@ -119,6 +119,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
 
                         _solution_nonce = myNonce;
                         _solution_input = tmp_input;
+                        _solution_hash = hash;
                         solutionEvent(_solution_nonce);
                     }
 
