@@ -13,16 +13,16 @@ class TestStr2BigNum(TestCase):
         number = StringToUInt256("16")
 
         expected_vector = (
-            0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
         )
 
         self.assertEqual(expected_vector, number)
 
     def test_numberBig(self):
-        number = StringToUInt256("134123412341234123412346")
+        number = StringToUInt256("55217455456816260776929245529948378455782781241038999928326084774751073468416")
 
         expected_vector = (
              122,   19,  248,  230,   14,  172,   65,  216,
@@ -43,6 +43,6 @@ class TestStr2BigNum(TestCase):
 
         value = UInt256ToString(input_vector)
 
-        expected_value = "134123412341234123412346"
+        expected_value = "55217455456816260776929245529948378455782781241038999928326084774751073468416"
 
         self.assertEqual(expected_value, value)

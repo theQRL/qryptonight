@@ -46,6 +46,7 @@ public:
 
     uint32_t solutionNonce() { return _solution_nonce; }
     std::vector<uint8_t> solutionInput() { return _solution_input; }
+    std::vector<uint8_t> solutionHash() { return _solution_hash; }
 
     void cancel();
 
@@ -61,6 +62,7 @@ protected:
     size_t _nonceOffset;
 
     std::vector<uint8_t> _solution_input;
+    std::vector<uint8_t> _solution_hash;
     uint32_t _solution_nonce;
 
     std::atomic_bool _solution_found;
