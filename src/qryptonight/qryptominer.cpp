@@ -125,6 +125,7 @@ void Qryptominer::cancel()
     {
         t.join();
     }
+    _runningThreads.clear();
 }
 
 void Qryptominer::solutionEvent(uint32_t nonce)
