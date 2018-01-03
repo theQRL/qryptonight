@@ -23,6 +23,7 @@
 
 #include "qryptominer.h"
 #include <iostream>
+#include <chrono>
 
 Qryptominer::Qryptominer()
 {
@@ -72,21 +73,42 @@ bool Qryptominer::start(uint8_t thread_count=1)
     cancel();
     _stop_request = false;
     _solution_found = false;
+    _hash_count = 0;
+    _hash_per_sec = 0;
 
-    for(uint32_t i=0; i < thread_count; i++ )
+    for(uint32_t thread_idx=0; thread_idx < thread_count; thread_idx++ )
     {
         _runningThreads.emplace_back(
-            std::thread([&](uint32_t i, uint8_t thread_count)
+            std::thread([&](uint32_t thread_idx, uint8_t thread_count)
             {
                 Qryptonight qn;
                 auto tmp_input(_input);
-                uint32_t myNonce = i;
+                uint32_t myNonce = thread_idx;
+
+                auto referenceTime = std::chrono::high_resolution_clock::now();
+                std::chrono::high_resolution_clock::time_point threadTime;
+                double drift = 0;
 
                 while(!_stop_request && !_solution_found)
                 {
                     setNonce(tmp_input, myNonce);
+                    auto hash = qn.hash(tmp_input);
+                    _hash_count++;
 
-                    if (passesTarget(qn.hash(tmp_input)))
+                    if (thread_idx==0)
+                    {
+                        threadTime = std::chrono::high_resolution_clock::now();
+                        std::chrono::duration<double, std::milli> delta = threadTime - referenceTime;
+                        if (delta.count() + drift > 1000)
+                        {
+                            drift = delta.count() + drift - 1000;
+                            referenceTime = std::chrono::high_resolution_clock::now();
+                            _hash_per_sec = 0+_hash_count;
+                            _hash_count=0;
+                        }
+                    }
+
+                    if (passesTarget(hash))
                     {
                         {
                             std::lock_guard<std::mutex> lock(_solution_mutex);
@@ -102,7 +124,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
 
                     myNonce += thread_count;
                 }
-            }, i, thread_count));
+            }, thread_idx, thread_count));
     }
     return true;
 }

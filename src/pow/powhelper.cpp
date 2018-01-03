@@ -37,27 +37,17 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
                                               uint64_t parent_timestamp,
                                               std::vector<uint8_t> parent_difficulty_vec)
 {
-    std::cout << std::endl;
-
     const uint256_t _difficulty_lower_bound = 0;
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
     auto parent_difficulty = fromByteVector(parent_difficulty_vec);
 
     bigint const delta = bigint(timestamp) - parent_timestamp;
-
-    std::cout << "delta: " << delta << std::endl;
-
     bigint const adjFactor = std::max<bigint>(10 - 10*delta / 60, -99);
-
-    std::cout << "adjFactor: " << adjFactor << std::endl;
-
     bigint difficulty = parent_difficulty + parent_difficulty / 2048 * adjFactor;
 
     // Apply boundaries
     difficulty = std::max<bigint>(difficulty, _difficulty_lower_bound);
     difficulty = std::min<bigint>(difficulty, _difficulty_upper_bound);
-
-    std::cout << difficulty << std::endl;
 
     return toByteVector(uint256_t(difficulty));
 }

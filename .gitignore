@@ -45,3 +45,5 @@ tests/python/coverage\.xml
 
 tests/python/\.coverage
 /.cache/
+
+cmake-build-release/

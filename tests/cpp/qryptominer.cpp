@@ -158,4 +158,27 @@ namespace {
             EXPECT_EQ(expected_winner, qm.solutionInput());
         }
     }
+
+    TEST(Qryptominer, MeasureHashRate) {
+        Qryptominer qm;
+
+        std::vector<uint8_t> input {
+                0x03, 0x05, 0x07, 0x09, 0x18
+        };
+
+        std::vector<uint8_t> target {
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
+                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
+                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
+        };
+
+        qm.setInput(input, 0, target);
+        qm.start(4);
+        sleep(3);
+        std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
+
+        EXPECT_FALSE(qm.solutionFound());
+    }
+
 }

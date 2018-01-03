@@ -49,6 +49,8 @@ public:
 
     void cancel();
 
+    uint32_t hashRate() { return static_cast<uint32_t>(_hash_per_sec); };
+
     virtual void solutionEvent(uint32_t nonce);
 
 protected:
@@ -63,6 +65,9 @@ protected:
 
     std::atomic_bool _solution_found;
     std::atomic_bool _stop_request;
+    std::atomic<std::uint32_t> _hash_count;
+    std::atomic<std::uint32_t> _hash_per_sec;
+
     std::vector<std::thread> _runningThreads;
     std::mutex _solution_mutex;
 };
