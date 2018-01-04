@@ -37,7 +37,7 @@ public:
     void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
 
     bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
-    void verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
+    bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
     bool start(uint8_t thread_count);
     bool isRunning();
@@ -46,7 +46,7 @@ public:
     virtual void solutionEvent(uint32_t nonce);
 
     bool solutionFound() { return _solution_found; }
-    uint32_t solutionNonce() { return _solution_nonce; }
+    uint32_t solutionNonce();
     std::vector<uint8_t> solutionInput() { return _solution_input; }
     std::vector<uint8_t> solutionHash() { return _solution_hash; }
     uint32_t hashRate() { return static_cast<uint32_t>(_hash_per_sec); };
@@ -60,7 +60,6 @@ protected:
 
     std::vector<uint8_t> _solution_input;
     std::vector<uint8_t> _solution_hash;
-    uint32_t _solution_nonce;
 
     std::atomic_bool _solution_found;
     std::atomic_bool _stop_request;
