@@ -36,21 +36,6 @@ Qryptominer::~Qryptominer()
     // Stop threads
 }
 
-bool Qryptominer::passesTarget(const std::vector<uint8_t> &hash)
-{
-    // The hash needs to be below the target (both 32 bytes)
-    for(size_t i = 0; i < 32; i++)
-    {
-        if (hash[i] > _target[i])
-            return false;
-
-        if (hash[i] < _target[i])
-            return true;
-    }
-
-    return false;  // they are equal
-}
-
 void Qryptominer::setNonce(std::vector<uint8_t> &input, uint32_t value)
 {
     auto p = input.data();
@@ -66,6 +51,28 @@ void Qryptominer::setInput(const std::vector<uint8_t> &input, size_t nonceOffset
     _input = input;
     _nonceOffset = nonceOffset;
     _target = target;
+}
+
+bool Qryptominer::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
+{
+    // The hash needs to be below the target (both 32 bytes)
+    for(size_t i = 0; i < 32; i++)
+    {
+        if (hash[i] > target[i])
+            return false;
+
+        if (hash[i] < target[i])
+            return true;
+    }
+
+    return false;  // they are equal
+}
+
+void Qryptominer::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
+{
+    Qryptonight qn;
+    auto hash = qn.hash(input);
+    passesTarget(hash, target);
 }
 
 bool Qryptominer::start(uint8_t thread_count=1)
@@ -108,7 +115,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
                         }
                     }
 
-                    if (passesTarget(hash))
+                    if (passesTarget(hash, _target))
                     {
                         {
                             std::lock_guard<std::mutex> lock(_solution_mutex);

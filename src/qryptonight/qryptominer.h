@@ -34,25 +34,22 @@ public:
     Qryptominer();
     virtual ~Qryptominer();
 
-    bool passesTarget(const std::vector<uint8_t> &hash);
-
     void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
 
-    bool start(uint8_t thread_count);
+    bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
+    void verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
+    bool start(uint8_t thread_count);
     bool isRunning();
+    void cancel();
+
+    virtual void solutionEvent(uint32_t nonce);
 
     bool solutionFound() { return _solution_found; }
-
     uint32_t solutionNonce() { return _solution_nonce; }
     std::vector<uint8_t> solutionInput() { return _solution_input; }
     std::vector<uint8_t> solutionHash() { return _solution_hash; }
-
-    void cancel();
-
     uint32_t hashRate() { return static_cast<uint32_t>(_hash_per_sec); };
-
-    virtual void solutionEvent(uint32_t nonce);
 
 protected:
     void setNonce(std::vector<uint8_t> &input, uint32_t value);
