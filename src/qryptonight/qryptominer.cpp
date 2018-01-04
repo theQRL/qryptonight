@@ -24,6 +24,7 @@
 #include "qryptominer.h"
 #include <iostream>
 #include <chrono>
+#include <netinet/in.h>
 
 Qryptominer::Qryptominer()
 {
@@ -40,7 +41,14 @@ void Qryptominer::setNonce(std::vector<uint8_t> &input, uint32_t value)
 {
     auto p = input.data();
     auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
-    *nonce = value;
+    *nonce =  htonl(value);
+}
+
+uint32_t Qryptominer::solutionNonce()
+{
+    auto p = _solution_input.data();
+    auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
+    return ntohl(*nonce);
 }
 
 void Qryptominer::setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target)
@@ -68,11 +76,11 @@ bool Qryptominer::passesTarget(const std::vector<uint8_t> &hash, const std::vect
     return false;  // they are equal
 }
 
-void Qryptominer::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
+bool Qryptominer::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
 {
     Qryptonight qn;
     auto hash = qn.hash(input);
-    passesTarget(hash, target);
+    return passesTarget(hash, target);
 }
 
 bool Qryptominer::start(uint8_t thread_count=1)
@@ -124,10 +132,9 @@ bool Qryptominer::start(uint8_t thread_count=1)
                             _solution_found = true;
                         }
 
-                        _solution_nonce = myNonce;
                         _solution_input = tmp_input;
                         _solution_hash = hash;
-                        solutionEvent(_solution_nonce);
+                        solutionEvent( solutionNonce());
                     }
 
                     myNonce += thread_count;
