@@ -29,10 +29,6 @@ namespace {
     TEST(Qryptominer, PassesTarget) {
         Qryptominer qm;
 
-        std::vector<uint8_t> input {
-            0x03, 0x05, 0x07, 0x09
-        };
-
         std::vector<uint8_t> target {
             0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
             0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
@@ -40,9 +36,7 @@ namespace {
             0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
         };
 
-        qm.setInput(input, 0, target);
-
-        EXPECT_FALSE(qm.passesTarget(target));
+        EXPECT_FALSE(qm.passesTarget(target, target));
 
         // Iterate changing a single byte
         for (int i=0; i<32; i++)
@@ -50,11 +44,11 @@ namespace {
             std::vector<uint8_t> below_1 = target;
             below_1[i]--;
 
-            EXPECT_TRUE(qm.passesTarget(below_1));
+            EXPECT_TRUE(qm.passesTarget(below_1, target));
 
             std::vector<uint8_t> over_1 = target;
             over_1[i]++;
-            EXPECT_FALSE(qm.passesTarget(over_1));
+            EXPECT_FALSE(qm.passesTarget(over_1, target));
         }
     }
 
