@@ -24,30 +24,34 @@
 #include "powhelper.h"
 #include "misc/bignum.h"
 
-PoWHelper::PoWHelper()
+PoWHelper::PoWHelper(int64_t coeff_a,
+                     int64_t coeff_b,
+                     int64_t coeff_c,
+                     int64_t coeff_d)
 {
-}
-
-PoWHelper::~PoWHelper()
-{
-
+    _coeff_a=coeff_a;
+    _coeff_b=coeff_b;
+    _coeff_c=coeff_c;
+    _coeff_d=coeff_d;
 }
 
 std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
                                               uint64_t parent_timestamp,
-                                              std::vector<uint8_t> parent_difficulty_vec)
+                                              const std::vector<uint8_t> &parent_difficulty_vec)
 {
     const uint256_t _difficulty_lower_bound = 0;
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
     auto parent_difficulty = fromByteVector(parent_difficulty_vec);
 
-//    auto coeff_d = bigint(2048);
-    auto coeff_d = bigint(16);
+    auto tmp_a = bigint(_coeff_a);
+    auto tmp_b = bigint(_coeff_b);
+    auto tmp_c = bigint(_coeff_c);
+    auto tmp_d = bigint(_coeff_d);
 
     std::cout << std::endl;
-    bigint const delta = bigint(timestamp) - parent_timestamp;
-    bigint const adjFactor = std::max<bigint>(10 - 10*delta / 60, -99);
-    bigint difficulty = parent_difficulty + (parent_difficulty * adjFactor)/coeff_d;
+    const bigint delta = bigint(timestamp) - parent_timestamp;
+    const bigint adjFactor = std::max<bigint>(tmp_a - tmp_a*delta / tmp_b, tmp_c);
+    bigint difficulty = parent_difficulty + (parent_difficulty * adjFactor)/tmp_d;
 
 //    std::cout << "parent diff    " << parent_difficulty << std::endl;
 //    std::cout << "delta          " << delta << std::endl;
@@ -60,7 +64,7 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
     return toByteVector(uint256_t(difficulty));
 }
 
-std::vector<uint8_t> PoWHelper::getBoundary(std::vector<uint8_t> difficulty_vec)
+std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficulty_vec)
 {
     std::vector<uint8_t> boundary(32, 0);
 

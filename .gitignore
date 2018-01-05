@@ -49,3 +49,7 @@ tests/python/\.coverage
 cmake-build-release/
 
 pyqryptonight/__pycache__/
+
+coverage\.xml
+
+\.coverage

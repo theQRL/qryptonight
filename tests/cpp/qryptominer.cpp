@@ -109,7 +109,7 @@ namespace {
         qm.start(1);
         qm.setInput(input, 0, boundary);
         qm.start(1);
-        sleep(2);
+        sleep(3);
 
         ASSERT_TRUE(qm.solutionFound());
         EXPECT_EQ(24, qm.solutionNonce());

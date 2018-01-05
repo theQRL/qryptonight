@@ -3,7 +3,7 @@
 
 #include "bignum.h"
 
-uint256_t fromByteVector(std::vector<uint8_t> vec)
+uint256_t fromByteVector(const std::vector<uint8_t> &vec)
 {
     uint256_t tmp(0);
     for(uint8_t i=0; i<32; i++)
@@ -27,7 +27,7 @@ std::vector<uint8_t> toByteVector(uint256_t val)
     return tmp;
 }
 
-std::string printByteVector(std::vector<uint8_t> vec)
+std::string printByteVector(const std::vector<uint8_t> &vec)
 {
     std::stringstream ss;
 

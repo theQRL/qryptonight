@@ -29,14 +29,22 @@
 
 class PoWHelper {
 public:
-    PoWHelper();
-    virtual ~PoWHelper();
+    PoWHelper( int64_t coeff_a=10,
+               int64_t coeff_b=60,
+               int64_t coeff_c=-99,
+               int64_t coeff_d=16);
+    virtual ~PoWHelper()=default;
 
     std::vector<uint8_t> getDifficulty(uint64_t timestamp,
                                        uint64_t parent_timestamp,
-                                       std::vector<uint8_t> parent_difficulty);
+                                       const std::vector<uint8_t> &parent_difficulty);
 
-    std::vector<uint8_t> getBoundary(std::vector<uint8_t> difficulty);
+    std::vector<uint8_t> getBoundary(const std::vector<uint8_t> &difficulty);
+private:
+    int64_t _coeff_a;
+    int64_t _coeff_b;
+    int64_t _coeff_c;
+    int64_t _coeff_d;
 };
 
 #endif //QRYPTONIGHT_POW_Impl_H
