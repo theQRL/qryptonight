@@ -88,9 +88,9 @@ jobs:
     deploy:
       provider: pypi
       skip_cleanup: true
-      user: jleni
+      user: deployqrl
       password:
-        secure: VvApoJkjRbGGlGioo5743Vn/U5//NZ5yd0Ql1SwVL6L08tRHh7nOQizvizc/2ybtgZTZ3s9ewwqLMEGOnIIFfjPN8N5vTJjndrOolVYC2ZaYim0hLc5ova9dswXUfFlKWDiKGvXSNc2napIUgp/kHolHt9ulSw1z5QGLE4dBJl9GyKybnUKaprEPLBVu2zxJaDm0RoBcy0PQIRJyRIa3sP29hrD+EfnywfGiaBGah+xashWOuEQhyrALqLvFgpiOpuoNsT4/zfMUl8k8YAUDhg1a54RAXzHJ4DwMECoRMfB8YD53knvwfeaxtawgD8eXzvY4phU/pWgPG4VyiiuRl2eIqxgYlAiGnNXuZA5IHwFgnc3ku6vVArANC+XGR6QU2BllZiSCWxZyplAQ7dLxQDcrP/AzZ8t+2MKQhwAoHIUsshIox3Mc9vBUJhGv75AMpm3Lai1/IGA8ExDGBiEMLYEOXI+hPI/hnHoLpKOE19zYqa5OxGPb37VFkTP8OrB0Pb7x8j1IY4CTamLRQvYX2XTExLvHS0+KUtEUn688ti6Fid5dU6HR0oFLHuo6NqEH7yHPjhdoj4tBYb32hgujFsIYdqpY/4e/2zDtRyExdDLpHytKkv668JCs9NREBIh71XDi/wfhtYmi3ck5LGD9x4Ikq9qVl2wlfcnw5rl4O0k=
+        secure: bZxMw6W3WxarfdTR8tvzc4tv5u92IHqP6mw2b0Qm2u3QrHfFr7ZPspedlFHBGF9sx8Lpprn6eeonodBfAEFTZiaQ+JwsLUFyMpIdMnkALWXukIp1LYv1Paj6hqhGYv/sBE2kvsAVzxJRCiIGFc5wnboIxztI4XsnF/OqblVO8DFYTsSlNrIDmwX+Nk5ltL32yOCrsOL0koGt2IDCDUTy848LT4GdL+xOLEW1Pq4R0nFJ0lBN/qOCZHN9wj6+VQGPfiYP0ePzedeAPtYhOXfaJUSnLYYamIqpL2g3X1Q93RKpq+epUDDp7hMT2avF3fV+x9ArW3k4/GKld/vndP+VOmMVyEL1Kj6F7fFzm4dnh7yyf0+DweUSQNiYdJtclyX9yZwKrM3kDSg4PpQ8eMOf8IqVFo75hbx51T072tPE06kir/VUyJ1t3Y8fJZroIIq6ayYPuosf56k2/+T0RrFKSyTeVf9vG+mPM7azQHuU77MOqR7tW7caxbTTuSIpgmYqW7nAggCVJqELoNAQeJfz9tVeLEsn2jLo1CsJikkCQIWXn6JXT+NGslGY5MQTxeEd9+2A7qmsxXs9ZXlkhNSAqlSaMzO5Ao0AdniAiEc3YKoHgPPs9LfB1mXdc3Bl6fToWMd23AmLCIm37TuyCOTs/qf2m/CSqX3bj/a12NOoMu4=
       on:
         tags: true
         all_branches: true
