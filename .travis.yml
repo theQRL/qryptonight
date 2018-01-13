@@ -18,6 +18,11 @@ addons:
     - python3
     - python3-pip
 
+notifications:
+  webhooks:
+    urls:
+      - secure: "gbaVpg8w+2qUNjUmTzaZf5fy0IWbG8YzJLCQBx6RXuxw3GhYDu/AyzhpHE/JZ0ypFhUEVNL7GsroYSVZlTLcWHp9zXZruzSp6d490Jgk1ZROYZlLar9pBS0BRgbmWFKt8ibMzOVo4mU0YS4mcsdi8JRO0PyEM9vAMWg/fAlVdERUQRsrEgDnuENeT0mFWGAKf0hT5DtWV4RrKYXBodmfGcunKl3gKCc6FBdsoaHz+iK891LjA5l715GYiDMk92QNiT7/Q6trDZSgOlnDh076gMxwEcTHPHZlocnCks1grSRCyaokQYNbaCjwEC7YRSL63LTiWWzyXBOEXHB5yVzE+ipQGvOSiZ4FcjJG90puMiwVIzxckM7knDupMfUXg4SrLvtg5Wt8KFDqxXzYAaKOH/O/Xt9OmjqEIVnS1Zx+EGzMZdMN/0/TNu2i1o4Rxnsi/X+k5nS1ouF3rBas+A3xamw643UR7zYPMGpVpxwGAwEPh7KFPXuK5aZ7VNNlo6hC5GkYguWGttzJpy+c+Vl7X0rP4bh4CUu2VHpVIgXTA2WYhBeFSjqQPy66tknoxHg8rM5/wi7SRrZRKe9kDMQclaOAMyeO512Mp7JI2niKbVkJHV5QiBZLp8H7e+xR3cqoQuR4bDof0Dqpt1qzy3R7IKOwJ9O4q03XwNIzLTvicEM="
+
 ########################
 ########################
 jobs:
