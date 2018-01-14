@@ -53,3 +53,7 @@ pyqryptonight/__pycache__/
 coverage\.xml
 
 \.coverage
+
+\.DS_Store
+
+modeling/\.ipynb_checkpoints/

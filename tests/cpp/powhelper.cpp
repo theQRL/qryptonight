@@ -87,19 +87,25 @@ namespace {
 
         std::vector<uint8_t> answer;
 
+        answer = ph.getDifficulty(130, 100, toByteVector(1000000) );
+        EXPECT_EQ(1330000, fromByteVector(answer));
+
+        answer = ph.getDifficulty(140, 100, toByteVector(1000000) );
+        EXPECT_EQ(1220000, fromByteVector(answer));
+
         answer = ph.getDifficulty(155, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(1062500), answer);
+        EXPECT_EQ(1055000, fromByteVector(answer));
 
         answer = ph.getDifficulty(160, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(1000000), answer);
+        EXPECT_EQ(1000000, fromByteVector(answer));
 
         answer = ph.getDifficulty(170, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(937500), answer);
+        EXPECT_EQ(890000, fromByteVector(answer));
 
         answer = ph.getDifficulty(180, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(812500), answer);
+        EXPECT_EQ(780000, fromByteVector(answer));
 
         answer = ph.getDifficulty(190, 100, toByteVector(1000000) );
-        EXPECT_EQ(toByteVector(687500), answer);
+        EXPECT_EQ(670000, fromByteVector(answer));
     }
 }
