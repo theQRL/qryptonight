@@ -127,12 +127,16 @@ bool Qryptominer::start(uint8_t thread_count=1)
                     {
                         {
                             std::lock_guard<std::mutex> lock(_solution_mutex);
-                            if (_solution_found)
-                                continue;
-                            _solution_found = true;
-                            _solution_input = tmp_input;
-                            _solution_hash = hash;
-                            solutionEvent( solutionNonce());
+                            if (!_solution_found){
+                                _solution_found = true;
+                                _solution_input = tmp_input;
+                                _solution_hash = hash;
+                                _solution_event = std::async(std::launch::async, [this]()
+                                {
+                                    cancel();
+                                    solutionEvent( solutionNonce() );
+                                });
+                            }
                         }
                     }
 

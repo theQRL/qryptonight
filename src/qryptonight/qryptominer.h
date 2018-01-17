@@ -28,6 +28,7 @@
 #include <atomic>
 #include <thread>
 #include <mutex>
+#include <future>
 
 class Qryptominer {
 public:
@@ -68,6 +69,8 @@ protected:
 
     std::vector<std::thread> _runningThreads;
     std::mutex _solution_mutex;
+
+    std::future<void> _solution_event;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H
