@@ -22,6 +22,7 @@
   */
 
 #include "powhelper.h"
+#include "qryptonight.h"
 #include "misc/bignum.h"
 
 PoWHelper::PoWHelper(int64_t kp,
@@ -81,4 +82,26 @@ std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficul
     uint256_t tmp2 = uint256_t(max_boundary/bigint(difficulty));
 
     return toByteVector(tmp2);
+}
+
+bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
+{
+    // The hash needs to be below the target (both 32 bytes)
+    for(size_t i = 0; i < 32; i++)
+    {
+        if (hash[i] > target[i])
+            return false;
+
+        if (hash[i] < target[i])
+            return true;
+    }
+
+    return false;  // they are equal
+}
+
+bool PoWHelper::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
+{
+    Qryptonight qn;
+    auto hash = qn.hash(input);
+    return passesTarget(hash, target);
 }

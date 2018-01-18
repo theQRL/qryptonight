@@ -22,6 +22,7 @@
   */
 
 #include "qryptominer.h"
+#include "pow/powhelper.h"
 #include <iostream>
 #include <chrono>
 #include <netinet/in.h>
@@ -59,28 +60,6 @@ void Qryptominer::setInput(const std::vector<uint8_t> &input, size_t nonceOffset
     _input = input;
     _nonceOffset = nonceOffset;
     _target = target;
-}
-
-bool Qryptominer::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
-{
-    // The hash needs to be below the target (both 32 bytes)
-    for(size_t i = 0; i < 32; i++)
-    {
-        if (hash[i] > target[i])
-            return false;
-
-        if (hash[i] < target[i])
-            return true;
-    }
-
-    return false;  // they are equal
-}
-
-bool Qryptominer::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
-{
-    Qryptonight qn;
-    auto hash = qn.hash(input);
-    return passesTarget(hash, target);
 }
 
 bool Qryptominer::start(uint8_t thread_count=1)
@@ -123,7 +102,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
                         }
                     }
 
-                    if (passesTarget(hash, _target))
+                    if (PoWHelper::passesTarget(hash, _target))
                     {
                         {
                             std::lock_guard<std::mutex> lock(_solution_mutex);
@@ -145,17 +124,6 @@ bool Qryptominer::start(uint8_t thread_count=1)
             }, thread_idx, thread_count));
     }
     return true;
-}
-
-bool Qryptominer::isRunning()
-{
-    for (auto& t : _runningThreads)
-    {
-        if (t.joinable())
-            return true;
-    }
-
-    return false;
 }
 
 void Qryptominer::cancel()

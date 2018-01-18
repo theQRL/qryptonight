@@ -41,6 +41,10 @@ public:
                                        const std::vector<uint8_t> &parent_difficulty);
 
     std::vector<uint8_t> getBoundary(const std::vector<uint8_t> &difficulty);
+
+    static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
+    static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
+
 private:
     long double _Kp;
     int64_t _set_point;
