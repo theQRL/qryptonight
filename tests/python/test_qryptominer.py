@@ -5,6 +5,7 @@ import time
 
 from pyqryptonight.pyqryptonight import Qryptominer
 from pyqryptonight.pyqryptonight import Qryptonight
+from pyqryptonight.pyqryptonight import PoWHelper
 
 
 class TestQryptominer(TestCase):
@@ -94,7 +95,7 @@ class TestQryptominer(TestCase):
         output = qn.hash(solution_input)
         print("raw     Hash   ", output)
 
-        self.assertTrue(qm.verifyInput(solution_input, target))
+        self.assertTrue(PoWHelper.verifyInput(solution_input, target))
         solution_input[4] = 0x20
-        self.assertFalse(qm.verifyInput(solution_input, target))
+        self.assertFalse(PoWHelper.verifyInput(solution_input, target))
 

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <qryptonight/qryptominer.h>
 #include <misc/bignum.h>
+#include <pow/powhelper.h>
 #include "gtest/gtest.h"
 
 namespace {
@@ -36,7 +37,7 @@ namespace {
             0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
         };
 
-        EXPECT_FALSE(qm.passesTarget(target, target));
+        EXPECT_FALSE(PoWHelper::passesTarget(target, target));
 
         // Iterate changing a single byte
         for (int i=0; i<32; i++)
@@ -44,11 +45,11 @@ namespace {
             std::vector<uint8_t> below_1 = target;
             below_1[i]--;
 
-            EXPECT_TRUE(qm.passesTarget(below_1, target));
+            EXPECT_TRUE(PoWHelper::passesTarget(below_1, target));
 
             std::vector<uint8_t> over_1 = target;
             over_1[i]++;
-            EXPECT_FALSE(qm.passesTarget(over_1, target));
+            EXPECT_FALSE(PoWHelper::passesTarget(over_1, target));
         }
     }
 

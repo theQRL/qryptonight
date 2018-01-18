@@ -37,11 +37,7 @@ public:
 
     void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
 
-    bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
-    bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
-
     bool start(uint8_t thread_count);
-    bool isRunning();
     void cancel();
 
     virtual void solutionEvent(uint32_t nonce);
