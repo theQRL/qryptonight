@@ -47,6 +47,7 @@ void Qryptominer::setNonce(std::vector<uint8_t> &input, uint32_t value)
 
 uint32_t Qryptominer::solutionNonce()
 {
+    std::lock_guard<std::mutex> lock(_solution_mutex);
     auto p = _solution_input.data();
     auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
     return ntohl(*nonce);
@@ -70,6 +71,7 @@ bool Qryptominer::start(uint8_t thread_count=1)
     _hash_count = 0;
     _hash_per_sec = 0;
 
+    std::lock_guard<std::mutex> lock(_runningThreads_mutex);
     for(uint32_t thread_idx=0; thread_idx < thread_count; thread_idx++ )
     {
         _runningThreads.emplace_back(
@@ -128,11 +130,14 @@ bool Qryptominer::start(uint8_t thread_count=1)
 
 void Qryptominer::cancel()
 {
+    std::lock_guard<std::mutex> lock(_runningThreads_mutex);
+
     _stop_request = true;
     for (auto& t : _runningThreads)
     {
         t.join();
     }
+
     _runningThreads.clear();
 }
 
