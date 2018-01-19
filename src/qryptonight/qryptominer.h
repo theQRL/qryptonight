@@ -42,11 +42,30 @@ public:
 
     virtual void solutionEvent(uint32_t nonce);
 
-    bool solutionFound() { return _solution_found; }
+    bool solutionFound()
+    {
+        std::lock_guard<std::mutex> lock(_solution_mutex);
+        return _solution_found;
+    }
     uint32_t solutionNonce();
-    std::vector<uint8_t> solutionInput() { return _solution_input; }
-    std::vector<uint8_t> solutionHash() { return _solution_hash; }
-    uint32_t hashRate() { return static_cast<uint32_t>(_hash_per_sec); };
+
+    std::vector<uint8_t> solutionInput()
+    {
+        std::lock_guard<std::mutex> lock(_solution_mutex);
+        return _solution_input;
+    }
+
+    std::vector<uint8_t> solutionHash()
+    {
+        std::lock_guard<std::mutex> lock(_solution_mutex);
+        return _solution_hash;
+    }
+
+    uint32_t hashRate()
+    {
+        std::lock_guard<std::mutex> lock(_solution_mutex);
+        return static_cast<uint32_t>(_hash_per_sec);
+    };
 
 protected:
     void setNonce(std::vector<uint8_t> &input, uint32_t value);
@@ -65,6 +84,7 @@ protected:
 
     std::vector<std::thread> _runningThreads;
     std::mutex _solution_mutex;
+    std::mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
 };
