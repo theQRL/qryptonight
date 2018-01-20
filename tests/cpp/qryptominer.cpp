@@ -71,7 +71,7 @@ namespace {
 
         sleep(3);
 
-        ASSERT_TRUE(qm.solutionFound());
+        ASSERT_TRUE(qm.solutionAvailable());
 
         EXPECT_EQ(24, qm.solutionNonce());
         std::cout << printByteVector(qm.solutionHash()) << std::endl;
@@ -109,7 +109,7 @@ namespace {
         qm.start(input, 0, boundary);
         sleep(3);
 
-        ASSERT_TRUE(qm.solutionFound());
+        ASSERT_TRUE(qm.solutionAvailable());
         EXPECT_EQ(24, qm.solutionNonce());
 
         std::vector<uint8_t> expected_winner {
@@ -137,7 +137,7 @@ namespace {
         sleep(3);
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 
-        EXPECT_FALSE(qm.solutionFound());
+        EXPECT_FALSE(qm.solutionAvailable());
     }
 
 }
