@@ -32,47 +32,31 @@
 
 class Qryptominer {
 public:
-    Qryptominer();
+    Qryptominer() = default;
     virtual ~Qryptominer();
 
-    void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
+    void start(const std::vector<uint8_t> &input,
+               size_t nonceOffset,
+               const std::vector<uint8_t> &target,
+               uint8_t thread_count = 1);
 
-    bool start(uint8_t thread_count);
     void cancel();
 
     virtual void solutionEvent(uint32_t nonce);
 
-    bool solutionFound()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_found;
-    }
+    bool solutionFound();
     uint32_t solutionNonce();
-
-    std::vector<uint8_t> solutionInput()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_input;
-    }
-
-    std::vector<uint8_t> solutionHash()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_hash;
-    }
-
-    uint32_t hashRate()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return static_cast<uint32_t>(_hash_per_sec);
-    };
+    std::vector<uint8_t> solutionInput();
+    std::vector<uint8_t> solutionHash();
+    uint32_t hashRate();
 
 protected:
     void setNonce(std::vector<uint8_t> &input, uint32_t value);
+    void _solutionEvent(uint32_t value);
 
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
-    size_t _nonceOffset;
+    size_t _nonceOffset { 0 };
 
     std::vector<uint8_t> _solution_input;
     std::vector<uint8_t> _solution_hash;
@@ -83,8 +67,9 @@ protected:
     std::atomic<std::uint32_t> _hash_per_sec;
 
     std::vector<std::thread> _runningThreads;
-    std::mutex _solution_mutex;
-    std::mutex _runningThreads_mutex;
+
+    std::recursive_timed_mutex _solution_mutex;
+    std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
 };

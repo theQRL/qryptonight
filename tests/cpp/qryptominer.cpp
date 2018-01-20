@@ -67,8 +67,7 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
+        qm.start(input, 0, boundary);
 
         sleep(3);
 
@@ -106,10 +105,8 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
+        qm.start(input, 0, boundary);
+        qm.start(input, 0, boundary);
         sleep(3);
 
         ASSERT_TRUE(qm.solutionFound());
@@ -136,8 +133,7 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, target);
-        qm.start(4);
+        qm.start(input, 0, target, 4);
         sleep(3);
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 

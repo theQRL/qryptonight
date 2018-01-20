@@ -33,11 +33,10 @@ class TestQryptominer(TestCase):
         qm = CustomQMiner()
 
         # Set input bytes, nonce
-        qm.setInput(input=input_bytes,
-                    nonceOffset=0,
-                    target=target)
-
-        qm.start(thread_count=2)
+        qm.start(input=input_bytes,
+                 nonceOffset=0,
+                 target=target,
+                 thread_count=2)
 
         # Python can sleep or do something else.. the callback will happen in the background
         time.sleep(2)
@@ -70,11 +69,10 @@ class TestQryptominer(TestCase):
         qm = CustomQMiner()
 
         # Set input bytes, nonce
-        qm.setInput(input=input_bytes,
-                    nonceOffset=0,
-                    target=target)
-
-        qm.start(thread_count=2)
+        qm.start(input=input_bytes,
+                 nonceOffset=0,
+                 target=target,
+                 thread_count=2)
 
         # Python can sleep or do something else.. the callback will happen in the background
         time.sleep(2)
@@ -98,4 +96,3 @@ class TestQryptominer(TestCase):
         self.assertTrue(PoWHelper.verifyInput(solution_input, target))
         solution_input[4] = 0x20
         self.assertFalse(PoWHelper.verifyInput(solution_input, target))
-
