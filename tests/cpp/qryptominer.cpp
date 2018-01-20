@@ -67,12 +67,11 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
+        qm.start(input, 0, boundary);
 
         sleep(3);
 
-        ASSERT_TRUE(qm.solutionFound());
+        ASSERT_TRUE(qm.solutionAvailable());
 
         EXPECT_EQ(24, qm.solutionNonce());
         std::cout << printByteVector(qm.solutionHash()) << std::endl;
@@ -106,13 +105,11 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
-        qm.setInput(input, 0, boundary);
-        qm.start(1);
+        qm.start(input, 0, boundary);
+        qm.start(input, 0, boundary);
         sleep(3);
 
-        ASSERT_TRUE(qm.solutionFound());
+        ASSERT_TRUE(qm.solutionAvailable());
         EXPECT_EQ(24, qm.solutionNonce());
 
         std::vector<uint8_t> expected_winner {
@@ -136,12 +133,56 @@ namespace {
                 0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
         };
 
-        qm.setInput(input, 0, target);
-        qm.start(4);
+        qm.start(input, 0, target, 4);
         sleep(3);
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 
-        EXPECT_FALSE(qm.solutionFound());
+        EXPECT_FALSE(qm.solutionAvailable());
+    }
+
+    TEST(Qryptominer, RunAndCancel) {
+        Qryptominer qm;
+
+        std::vector<uint8_t> input {
+                0x03, 0x05, 0x07, 0x09, 0x19
+        };
+
+        std::vector<uint8_t> boundary = {
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
+                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
+                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
+        };
+
+        qm.start(input, 0, boundary);
+        sleep(1);
+        qm.cancel();
+
+        ASSERT_FALSE(qm.solutionAvailable());
+    }
+
+    TEST(Qryptominer, RunCancelSafety) {
+        Qryptominer qm;
+
+        std::vector<uint8_t> input {
+                0x03, 0x05, 0x07, 0x09, 0x19
+        };
+
+        std::vector<uint8_t> boundary = {
+                0x9F, 0xFF, 0xFF, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
+                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
+                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
+                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
+        };
+
+        for(int i=0; i<20; i++)
+        {
+            using namespace std::chrono_literals;
+            boundary[0]-=10;
+            qm.start(input, 0, boundary);
+            std::this_thread::sleep_for(500ms);
+            qm.cancel();
+        }
     }
 
 }

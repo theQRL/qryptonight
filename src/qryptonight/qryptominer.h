@@ -29,64 +29,66 @@
 #include <thread>
 #include <mutex>
 #include <future>
+#include <deque>
+
+struct MinerSolutionEvent
+{
+    uint32_t nonce;
+    uint64_t event_seq;
+};
 
 class Qryptominer {
 public:
     Qryptominer();
     virtual ~Qryptominer();
 
-    void setInput(const std::vector<uint8_t> &input, size_t nonceOffset, const std::vector<uint8_t> &target);
+    void start(const std::vector<uint8_t> &input,
+               size_t nonceOffset,
+               const std::vector<uint8_t> &target,
+               uint8_t thread_count = 1);
 
-    bool start(uint8_t thread_count);
     void cancel();
 
     virtual void solutionEvent(uint32_t nonce);
 
-    bool solutionFound()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_found;
-    }
+    bool solutionAvailable();
+    std::vector<uint8_t> solutionInput();
+    std::vector<uint8_t> solutionHash();
     uint32_t solutionNonce();
-
-    std::vector<uint8_t> solutionInput()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_input;
-    }
-
-    std::vector<uint8_t> solutionHash()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return _solution_hash;
-    }
-
-    uint32_t hashRate()
-    {
-        std::lock_guard<std::mutex> lock(_solution_mutex);
-        return static_cast<uint32_t>(_hash_per_sec);
-    };
+    uint32_t hashRate();
 
 protected:
-    void setNonce(std::vector<uint8_t> &input, uint32_t value);
+    void _solutionEvent(uint32_t value, uint64_t event_seq);
+    void _eventThreadWorker();
 
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
-    size_t _nonceOffset;
+    size_t _nonceOffset { 0 };
+
+    std::atomic<std::uint64_t> _work_sequence_id { 0 };
 
     std::vector<uint8_t> _solution_input;
     std::vector<uint8_t> _solution_hash;
 
-    std::atomic_bool _solution_found;
-    std::atomic_bool _stop_request;
-    std::atomic<std::uint32_t> _hash_count;
-    std::atomic<std::uint32_t> _hash_per_sec;
+    std::atomic_bool _solution_found { false };
+    std::atomic_bool _stop_eventThread { false };
+    std::atomic_bool _stop_request { false };
+
+    std::atomic<std::uint32_t> _hash_count { 0 };
+    std::atomic<std::uint32_t> _hash_per_sec { 0 };
 
     std::vector<std::thread> _runningThreads;
-    std::mutex _solution_mutex;
-    std::mutex _runningThreads_mutex;
+
+    std::recursive_timed_mutex _solution_mutex;
+    std::recursive_timed_mutex _solution_event_mutex;
+    std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
+    std::thread _eventThread;
+
+    std::deque<MinerSolutionEvent> _eventQueue;
+    std::mutex _eventQueue_mutex;
+    std::condition_variable _eventReleased;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H
