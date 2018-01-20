@@ -45,7 +45,7 @@ class TestQryptominer(TestCase):
         self.assertEqual(2, qm.python_nonce)
 
         # Now check wrapper values
-        self.assertEqual(True, qm.solutionFound())
+        self.assertEqual(True, qm.solutionAvailable())
         self.assertEqual(2, qm.solutionNonce())
 
     def test_miner_verify(self):
@@ -79,7 +79,7 @@ class TestQryptominer(TestCase):
 
         # This property has been just created in the python custom class when the event is received
         self.assertEqual(2, qm.python_nonce)
-        self.assertEqual(True, qm.solutionFound())
+        self.assertEqual(True, qm.solutionAvailable())
         self.assertEqual(2, qm.solutionNonce())
 
         solution_input = list(qm.solutionInput())

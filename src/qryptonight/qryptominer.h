@@ -29,10 +29,17 @@
 #include <thread>
 #include <mutex>
 #include <future>
+#include <deque>
+
+struct MinerSolutionEvent
+{
+    uint32_t nonce;
+    uint64_t event_seq;
+};
 
 class Qryptominer {
 public:
-    Qryptominer() = default;
+    Qryptominer();
     virtual ~Qryptominer();
 
     void start(const std::vector<uint8_t> &input,
@@ -52,6 +59,7 @@ public:
 
 protected:
     void _solutionEvent(uint32_t value, uint64_t event_seq);
+    void _eventThreadWorker();
 
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
@@ -63,6 +71,7 @@ protected:
     std::vector<uint8_t> _solution_hash;
 
     std::atomic_bool _solution_found { false };
+    std::atomic_bool _stop_eventThread { false };
     std::atomic_bool _stop_request { false };
 
     std::atomic<std::uint32_t> _hash_count { 0 };
@@ -75,6 +84,11 @@ protected:
     std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
+    std::thread _eventThread;
+
+    std::deque<MinerSolutionEvent> _eventQueue;
+    std::mutex _eventQueue_mutex;
+    std::condition_variable _eventReleased;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H

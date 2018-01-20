@@ -27,9 +27,20 @@
 #include <chrono>
 #include <netinet/in.h>
 
+Qryptominer::Qryptominer()
+{
+    _eventThread = std::thread([&]()
+    {
+        _eventThreadWorker();
+    });
+}
+
 Qryptominer::~Qryptominer()
 {
     cancel();
+    _stop_eventThread = true;
+    _eventReleased.notify_one();
+    _eventThread.join();
 }
 
 bool Qryptominer::solutionAvailable()
@@ -69,6 +80,9 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
                         uint8_t thread_count)
 {
     cancel();
+    _work_sequence_id++;
+
+    std::cout << "Start: " << _work_sequence_id << std::endl;
 
     _input = input;
     _nonceOffset = nonceOffset;
@@ -125,16 +139,16 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
                             _solution_hash = current_hash;
 
                             {
-                                std::lock_guard<std::recursive_timed_mutex> lock(_solution_event_mutex);
-                                _solution_event = std::async(std::launch::async, [this](
-                                                                     uint32_t solution_nonce,
-                                                                     uint64_t event_seq)
-                                           {
-                                               _solutionEvent(solution_nonce, event_seq);
-                                           },
-                                           current_nonce,
-                                           _work_sequence_id.load());
+                                std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+
+                                MinerSolutionEvent event = {
+                                        .nonce = current_nonce,
+                                        .event_seq = _work_sequence_id.load()
+                                };
+
+                                _eventQueue.push_back(event);
                             }
+                            _eventReleased.notify_one();
                         }
                     }
 
@@ -147,7 +161,6 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 void Qryptominer::cancel()
 {
     std::lock_guard<std::recursive_timed_mutex> lock(_runningThreads_mutex);
-    _work_sequence_id++;
     _stop_request = true;
 
     for (auto& t : _runningThreads)
@@ -160,13 +173,39 @@ void Qryptominer::cancel()
 
 void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq)
 {
+    std::cout << "solEv: " << event_seq << " " << _work_sequence_id << std::endl;
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_event_mutex);
     if (event_seq == _work_sequence_id)
+    {
+        std::cout << "test" << std::endl;
         solutionEvent(nonce);
+    }
 }
 
 void Qryptominer::solutionEvent(uint32_t nonce)
 {
     // Derived classes can override to receive a callback
     std::cout << "Nonce: " << nonce << std::endl;
+}
+
+void Qryptominer::_eventThreadWorker()
+{
+    while(!_stop_eventThread)
+    {
+        std::unique_lock<std::mutex> queue_lock(_eventQueue_mutex);
+        _eventReleased.wait(queue_lock,
+                            [=]{ return !_eventQueue.empty() || _stop_eventThread; });
+
+        if (!_eventQueue.empty())
+        {
+            auto &event = _eventQueue.front();
+            _eventQueue.pop_front();
+            queue_lock.unlock();
+            _solutionEvent(event.nonce, event.event_seq);
+        }
+        else
+        {
+            queue_lock.unlock();
+        }
+    }
 }
