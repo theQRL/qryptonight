@@ -82,8 +82,6 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
     cancel();
     _work_sequence_id++;
 
-    std::cout << "Start: " << _work_sequence_id << std::endl;
-
     _input = input;
     _nonceOffset = nonceOffset;
     _target = target;
@@ -173,11 +171,9 @@ void Qryptominer::cancel()
 
 void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq)
 {
-    std::cout << "solEv: " << event_seq << " " << _work_sequence_id << std::endl;
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_event_mutex);
     if (event_seq == _work_sequence_id)
     {
-        std::cout << "test" << std::endl;
         solutionEvent(nonce);
     }
 }
