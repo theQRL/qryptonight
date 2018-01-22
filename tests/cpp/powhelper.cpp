@@ -90,17 +90,17 @@ namespace {
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(130, toByteVector(1000000) );
-        EXPECT_EQ(1048800, fromByteVector(answer));
+        EXPECT_EQ(1048828, fromByteVector(answer));
 
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(140, toByteVector(1000000) );
-        EXPECT_EQ(1032208, fromByteVector(answer));
+        EXPECT_EQ(1032226, fromByteVector(answer));
 
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(155, toByteVector(1000000) );
-        EXPECT_EQ(1007808, fromByteVector(answer));
+        EXPECT_EQ(1007812, fromByteVector(answer));
 
         ph.clearTimestamps();
         ph.addTimestamp(100);
@@ -110,17 +110,17 @@ namespace {
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(170, toByteVector(1000000) );
-        EXPECT_EQ(984384, fromByteVector(answer));
+        EXPECT_EQ(984375, fromByteVector(answer));
 
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(180, toByteVector(1000000) );
-        EXPECT_EQ(967792, fromByteVector(answer));
+        EXPECT_EQ(967774, fromByteVector(answer));
 
         ph.clearTimestamps();
         ph.addTimestamp(100);
         answer = ph.getDifficulty(190, toByteVector(1000000) );
-        EXPECT_EQ(951200, fromByteVector(answer));
+        EXPECT_EQ(951172, fromByteVector(answer));
     }
 
     TEST(PoWHelper, DifficultyExtreme) {
@@ -132,7 +132,7 @@ namespace {
         ph.addTimestamp(0);
         answer = ph.getDifficulty(247, toByteVector(10727) );
 
-        EXPECT_EQ(7617, fromByteVector(answer));
+        EXPECT_EQ(7470, fromByteVector(answer));
     }
 
 }

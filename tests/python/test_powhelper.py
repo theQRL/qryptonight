@@ -41,7 +41,7 @@ class TestPowHelper(TestCase):
         current_difficulty = ph.getDifficulty(timestamp=105,
                                               parent_difficulty=parent_difficulty)
 
-        expected_difficulty = '4708'
+        expected_difficulty = '4644'
 
         print(parent_difficulty)
         print(expected_difficulty)
@@ -50,6 +50,6 @@ class TestPowHelper(TestCase):
         self.assertEqual(expected_difficulty, UInt256ToString(current_difficulty))
 
         boundary = ph.getBoundary(current_difficulty)
-        expected_boundary = "24594751324833516445108535473383157997720897337646678852900931182649347841"
+        expected_boundary = "24933697079525451210932597977753640795277774475805461679469763998258641180"
 
         self.assertEqual(expected_boundary, UInt256ToString(boundary))
