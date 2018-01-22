@@ -24,7 +24,6 @@
 #include "powhelper.h"
 #include "qryptonight.h"
 #include "misc/bignum.h"
-#include <boost/multiprecision/cpp_dec_float.hpp>
 
 PoWHelper::PoWHelper(int64_t kp,
                      uint64_t set_point,
