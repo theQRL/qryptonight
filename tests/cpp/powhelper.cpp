@@ -87,25 +87,52 @@ namespace {
 
         std::vector<uint8_t> answer;
 
-        answer = ph.getDifficulty(130, 100, toByteVector(1000000) );
-        EXPECT_EQ(1330000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(130, toByteVector(1000000) );
+        EXPECT_EQ(1048800, fromByteVector(answer));
 
-        answer = ph.getDifficulty(140, 100, toByteVector(1000000) );
-        EXPECT_EQ(1220000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(140, toByteVector(1000000) );
+        EXPECT_EQ(1032208, fromByteVector(answer));
 
-        answer = ph.getDifficulty(155, 100, toByteVector(1000000) );
-        EXPECT_EQ(1055000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(155, toByteVector(1000000) );
+        EXPECT_EQ(1007808, fromByteVector(answer));
 
-        answer = ph.getDifficulty(160, 100, toByteVector(1000000) );
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(160, toByteVector(1000000) );
         EXPECT_EQ(1000000, fromByteVector(answer));
 
-        answer = ph.getDifficulty(170, 100, toByteVector(1000000) );
-        EXPECT_EQ(890000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(170, toByteVector(1000000) );
+        EXPECT_EQ(984384, fromByteVector(answer));
 
-        answer = ph.getDifficulty(180, 100, toByteVector(1000000) );
-        EXPECT_EQ(780000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(180, toByteVector(1000000) );
+        EXPECT_EQ(967792, fromByteVector(answer));
 
-        answer = ph.getDifficulty(190, 100, toByteVector(1000000) );
-        EXPECT_EQ(670000, fromByteVector(answer));
+        ph.clearTimestamps();
+        ph.addTimestamp(100);
+        answer = ph.getDifficulty(190, toByteVector(1000000) );
+        EXPECT_EQ(951200, fromByteVector(answer));
     }
+
+    TEST(PoWHelper, DifficultyExtreme) {
+        PoWHelper ph;
+
+        std::vector<uint8_t> answer;
+
+        ph.clearTimestamps();
+        ph.addTimestamp(0);
+        answer = ph.getDifficulty(247, toByteVector(10727) );
+
+        EXPECT_EQ(7617, fromByteVector(answer));
+    }
+
 }

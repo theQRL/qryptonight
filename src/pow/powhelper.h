@@ -26,18 +26,19 @@
 
 #include <vector>
 #include <cstdint>
+#include <deque>
 
 class PoWHelper {
 public:
-    explicit PoWHelper( int64_t kp_inv=100,
-                        int64_t set_point=60,
-                        int64_t adjfact_lower_percent=-10,
-                        int64_t adjfact_upper_percent=+10);
+    explicit PoWHelper( int64_t kp=100,
+                        uint64_t set_point=60,
+                        int64_t adjfact_lower=-1000,
+                        int64_t adjfact_upper=+1000,
+                        uint16_t history_size = 10);
 
     virtual ~PoWHelper()=default;
 
     std::vector<uint8_t> getDifficulty(uint64_t timestamp,
-                                       uint64_t parent_timestamp,
                                        const std::vector<uint8_t> &parent_difficulty);
 
     std::vector<uint8_t> getBoundary(const std::vector<uint8_t> &difficulty);
@@ -45,11 +46,19 @@ public:
     static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
     static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
+    void addTimestamp(uint64_t timestamp);
+    void clearTimestamps();
+
 private:
+    uint64_t get_average_delta(uint64_t timestamp);
+
+    std::deque<uint64_t> prev_timestamps;
+
     long double _Kp;
-    int64_t _set_point;
-    long double _adjfact_lower_percent;
-    long double _adjfact_upper_percent;
+    uint64_t _set_point;
+    int64_t _adjfact_lower;
+    int64_t _adjfact_upper;
+    uint16_t _history_size;
 };
 
 #endif //QRYPTONIGHT_POW_Impl_H
