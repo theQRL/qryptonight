@@ -95,7 +95,7 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
     }
 
     // calculate difficulty and apply boundaries
-    bigint difficulty = parent_difficulty + parent_difficulty / 1024 * adjustment;
+    bigint difficulty = parent_difficulty + (parent_difficulty * adjustment) / 1024;
 
     difficulty = std::max<bigint>(difficulty, _difficulty_lower_bound);
     difficulty = std::min<bigint>(difficulty, _difficulty_upper_bound);
