@@ -48,6 +48,7 @@ public:
                uint8_t thread_count = 1);
 
     void cancel();
+    bool isRunning();
 
     virtual void solutionEvent(uint32_t nonce);
 
@@ -78,6 +79,7 @@ protected:
     std::atomic<std::uint32_t> _hash_per_sec { 0 };
 
     std::vector<std::thread> _runningThreads;
+    std::atomic<std::uint32_t> _runningThreads_count { 0 };
 
     std::recursive_timed_mutex _solution_mutex;
     std::recursive_timed_mutex _solution_event_mutex;

@@ -98,6 +98,8 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
         _runningThreads.emplace_back(
             std::thread([&](uint32_t thread_idx, uint8_t thread_count)
             {
+                _runningThreads_count++;
+
                 Qryptonight qn;
                 auto tmp_input(_input);
                 auto p = tmp_input.data();
@@ -152,6 +154,8 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
                     current_nonce += thread_count;
                 }
+
+                _runningThreads_count++;
             }, thread_idx, thread_count));
     }
 }
@@ -167,6 +171,11 @@ void Qryptominer::cancel()
     }
 
     _runningThreads.clear();
+}
+
+bool Qryptominer::isRunning()
+{
+    return _runningThreads_count > 0;
 }
 
 void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq)
