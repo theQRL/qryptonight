@@ -24,45 +24,80 @@
 #include "powhelper.h"
 #include "qryptonight.h"
 #include "misc/bignum.h"
+#include <boost/multiprecision/cpp_dec_float.hpp>
 
 PoWHelper::PoWHelper(int64_t kp,
-                     int64_t set_point,
-                     int64_t adjfact_lower_percent,
-                     int64_t adjfact_upper_percent)
+                     uint64_t set_point,
+                     int64_t adjfact_lower,
+                     int64_t adjfact_upper,
+                     uint16_t history_size)
+: _Kp(kp),
+  _set_point(set_point),
+  _adjfact_lower(adjfact_lower),
+  _adjfact_upper(adjfact_upper),
+  _history_size(history_size)
 {
-    _Kp=kp;
-    _set_point=set_point;
-    _adjfact_lower_percent = adjfact_lower_percent;
-    _adjfact_upper_percent = adjfact_upper_percent;
+}
+
+void PoWHelper::addTimestamp(uint64_t timestamp)
+{
+    prev_timestamps.push_back(timestamp);
+
+    while(prev_timestamps.size() > _history_size)
+    {
+        prev_timestamps.pop_front();
+    }
+}
+
+void PoWHelper::clearTimestamps()
+{
+    prev_timestamps.clear();
+}
+
+uint64_t PoWHelper::get_average_delta(uint64_t timestamp)
+{
+    uint64_t sum_delta {0};
+    size_t prev_size = prev_timestamps.size();
+
+    if (prev_size == 0)
+    {
+        return _set_point;
+    }
+
+    for(size_t i = 1; i < prev_size-1; i++)
+    {
+        sum_delta += prev_timestamps[i-1] - prev_timestamps[i];
+    }
+
+    sum_delta += timestamp - prev_timestamps[prev_size-1];
+
+    return sum_delta / prev_size;
 }
 
 std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
-                                              uint64_t parent_timestamp,
                                               const std::vector<uint8_t> &parent_difficulty_vec)
 {
-    const uint256_t _difficulty_lower_bound = 2;        // To avoid issues with the target
+    const uint256_t _difficulty_lower_bound = 2;                                // To avoid issues with the target
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
 
     auto parent_difficulty = fromByteVector(parent_difficulty_vec);
-
-    const bigint delta = bigint(timestamp) - parent_timestamp;
-    const bigint error = delta - bigint(_set_point);
+    const uint64_t delta = get_average_delta(timestamp);
 
     // calculate adjustment factor and apply boundaries
-    bigint adjustment = (bigint(parent_difficulty) * error) / bigint(_Kp);
-    adjustment = std::max<bigint>(adjustment, adjustment - (adjustment * bigint(_adjfact_lower_percent)) / bigint(100));
-    adjustment = std::min<bigint>(adjustment, adjustment + (adjustment * bigint(_adjfact_upper_percent)) / bigint(100));
+    bigint adjustment = bigint(_Kp - _Kp*delta/_set_point);
 
-//#ifndef NDEBUG
-//    std::cout << std::endl << "--------------- " << std::endl;
-//    std::cout << "parent diff    " << parent_difficulty << std::endl;
-//    std::cout << "delta          " << delta << std::endl;
-//    std::cout << "error          " << error << std::endl;
-//    std::cout << "adjFactor      " << adjustment << std::endl;
-//#endif
+    if (adjustment > _adjfact_upper)
+    {
+        adjustment = bigint(_adjfact_upper);
+    }
+    if (adjustment < _adjfact_lower)
+    {
+        adjustment = bigint(_adjfact_lower);
+    }
 
     // calculate difficulty and apply boundaries
-    bigint difficulty = bigint(parent_difficulty) - adjustment;
+    bigint difficulty = parent_difficulty + parent_difficulty / 1024 * adjustment;
+
     difficulty = std::max<bigint>(difficulty, _difficulty_lower_bound);
     difficulty = std::min<bigint>(difficulty, _difficulty_upper_bound);
 
