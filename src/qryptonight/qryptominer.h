@@ -78,7 +78,7 @@ protected:
     std::atomic<std::uint32_t> _hash_count { 0 };
     std::atomic<std::uint32_t> _hash_per_sec { 0 };
 
-    std::vector<std::thread> _runningThreads;
+    std::vector<std::unique_ptr<std::thread>> _runningThreads;
     std::atomic<std::uint32_t> _runningThreads_count { 0 };
 
     std::recursive_timed_mutex _solution_mutex;
@@ -86,7 +86,7 @@ protected:
     std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
-    std::thread _eventThread;
+    std::unique_ptr<std::thread> _eventThread;
 
     std::deque<MinerSolutionEvent> _eventQueue;
     std::mutex _eventQueue_mutex;
