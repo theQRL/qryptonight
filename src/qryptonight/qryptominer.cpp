@@ -27,58 +27,47 @@
 #include <chrono>
 #include <netinet/in.h>
 
-Qryptominer::Qryptominer()
-{
-    _eventThread = std::thread([&]()
-    {
-        _eventThreadWorker();
-    });
+Qryptominer::Qryptominer() {
+    _eventThread = std::make_unique<std::thread>([&]() { _eventThreadWorker(); });
 }
 
-Qryptominer::~Qryptominer()
-{
+Qryptominer::~Qryptominer() {
     cancel();
     _stop_eventThread = true;
     _eventReleased.notify_one();
-    _eventThread.join();
+    _eventThread->join();
 }
 
-bool Qryptominer::solutionAvailable()
-{
+bool Qryptominer::solutionAvailable() {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
     return _solution_found;
 }
 
-std::vector<uint8_t> Qryptominer::solutionInput()
-{
+std::vector<uint8_t> Qryptominer::solutionInput() {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
     return _solution_input;
 }
 
-uint32_t Qryptominer::solutionNonce()
-{
+uint32_t Qryptominer::solutionNonce() {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
     auto p = _solution_input.data();
     auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
     return ntohl(*nonce);
 }
 
-std::vector<uint8_t> Qryptominer::solutionHash()
-{
+std::vector<uint8_t> Qryptominer::solutionHash() {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
     return _solution_hash;
 }
 
-uint32_t Qryptominer::hashRate()
-{
+uint32_t Qryptominer::hashRate() {
     return static_cast<uint32_t>(_hash_per_sec);
 };
 
 void Qryptominer::start(const std::vector<uint8_t> &input,
                         size_t nonceOffset,
                         const std::vector<uint8_t> &target,
-                        uint8_t thread_count)
-{
+                        uint8_t thread_count) {
     cancel();
     _work_sequence_id++;
 
@@ -93,123 +82,106 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
     std::lock_guard<std::recursive_timed_mutex> lock_runningThreads(_runningThreads_mutex);
 
-    for(uint32_t thread_idx=0; thread_idx < thread_count; thread_idx++ )
-    {
+    for (uint32_t thread_idx = 0; thread_idx < thread_count; thread_idx++) {
         _runningThreads.emplace_back(
-            std::thread([&](uint32_t thread_idx, uint8_t thread_count)
-            {
-                _runningThreads_count++;
+                std::make_unique<std::thread>([&](uint32_t thread_idx, uint8_t thread_count) {
+                    _runningThreads_count++;
 
-                Qryptonight qn;
-                auto tmp_input(_input);
-                auto p = tmp_input.data();
-                auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
+                    Qryptonight qn;
+                    auto tmp_input(_input);
+                    auto p = tmp_input.data();
+                    auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
 
-                uint32_t current_nonce = thread_idx;
+                    uint32_t current_nonce = thread_idx;
 
-                auto referenceTime = std::chrono::high_resolution_clock::now();
-                std::chrono::high_resolution_clock::time_point threadTime;
-                double drift = 0;
+                    auto referenceTime = std::chrono::high_resolution_clock::now();
+                    std::chrono::high_resolution_clock::time_point threadTime;
+                    double drift = 0;
 
-                while(!_stop_request && !_solution_found)
-                {
-                    *nonce =  htonl(current_nonce);
-                    auto current_hash = qn.hash(tmp_input);
-                    _hash_count++;
+                    while (!_stop_request && !_solution_found) {
+                        *nonce = htonl(current_nonce);
+                        auto current_hash = qn.hash(tmp_input);
+                        _hash_count++;
 
-                    if (thread_idx==0)
-                    {
-                        threadTime = std::chrono::high_resolution_clock::now();
-                        std::chrono::duration<double, std::milli> delta = threadTime - referenceTime;
-                        if (delta.count() + drift > 1000)
-                        {
-                            drift = delta.count() + drift - 1000;
-                            referenceTime = std::chrono::high_resolution_clock::now();
-                            _hash_per_sec = 0+_hash_count;
-                            _hash_count=0;
-                        }
-                    }
-
-                    if (PoWHelper::passesTarget(current_hash, _target))
-                    {
-                        std::lock_guard<std::recursive_timed_mutex> lock_solution(_solution_mutex);
-                        if (!_solution_found){
-                            _solution_found = true;
-                            _solution_input = tmp_input;
-                            _solution_hash = current_hash;
-
-                            {
-                                std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
-
-                                MinerSolutionEvent event = {
-                                        .nonce = current_nonce,
-                                        .event_seq = _work_sequence_id.load()
-                                };
-
-                                _eventQueue.push_back(event);
+                        if (thread_idx == 0) {
+                            threadTime = std::chrono::high_resolution_clock::now();
+                            std::chrono::duration<double, std::milli> delta = threadTime - referenceTime;
+                            if (delta.count() + drift > 1000) {
+                                drift = delta.count() + drift - 1000;
+                                referenceTime = std::chrono::high_resolution_clock::now();
+                                _hash_per_sec = 0 + _hash_count;
+                                _hash_count = 0;
                             }
-                            _eventReleased.notify_one();
                         }
+
+                        if (PoWHelper::passesTarget(current_hash, _target)) {
+                            std::lock_guard<std::recursive_timed_mutex> lock_solution(_solution_mutex);
+                            if (!_solution_found) {
+                                _solution_found = true;
+                                _solution_input = tmp_input;
+                                _solution_hash = current_hash;
+
+                                {
+                                    std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+
+                                    MinerSolutionEvent event = {
+                                            .nonce = current_nonce,
+                                            .event_seq = _work_sequence_id.load()
+                                    };
+
+                                    _eventQueue.push_back(event);
+                                }
+                                _eventReleased.notify_one();
+                            }
+                        }
+
+                        current_nonce += thread_count;
                     }
 
-                    current_nonce += thread_count;
-                }
-
-                _runningThreads_count++;
-            }, thread_idx, thread_count));
+                    _runningThreads_count++;
+                }, thread_idx, thread_count));
     }
 }
 
-void Qryptominer::cancel()
-{
+void Qryptominer::cancel() {
     std::lock_guard<std::recursive_timed_mutex> lock(_runningThreads_mutex);
     _stop_request = true;
 
-    for (auto& t : _runningThreads)
-    {
-        t.join();
+    for (auto &t : _runningThreads) {
+        t->join();
     }
 
     _runningThreads.clear();
 }
 
-bool Qryptominer::isRunning()
-{
+bool Qryptominer::isRunning() {
     return _runningThreads_count > 0;
 }
 
-void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq)
-{
+void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq) {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_event_mutex);
-    if (event_seq == _work_sequence_id)
-    {
+    if (event_seq == _work_sequence_id) {
         solutionEvent(nonce);
     }
 }
 
-void Qryptominer::solutionEvent(uint32_t nonce)
-{
+void Qryptominer::solutionEvent(uint32_t nonce) {
     // Derived classes can override to receive a callback
     std::cout << "Nonce: " << nonce << std::endl;
 }
 
-void Qryptominer::_eventThreadWorker()
-{
-    while(!_stop_eventThread)
-    {
+void Qryptominer::_eventThreadWorker() {
+    while (!_stop_eventThread) {
         std::unique_lock<std::mutex> queue_lock(_eventQueue_mutex);
         _eventReleased.wait(queue_lock,
-                            [=]{ return !_eventQueue.empty() || _stop_eventThread; });
+                            [=] { return !_eventQueue.empty() || _stop_eventThread; });
 
-        if (!_eventQueue.empty())
-        {
+        if (!_eventQueue.empty()) {
             auto &event = _eventQueue.front();
             _eventQueue.pop_front();
             queue_lock.unlock();
             _solutionEvent(event.nonce, event.event_seq);
-        }
-        else
-        {
+        } else {
             queue_lock.unlock();
         }
     }
