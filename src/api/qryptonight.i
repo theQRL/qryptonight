@@ -26,6 +26,33 @@ namespace std {
   %template(_string_list_list) vector<vector<unsigned char>>;
 }
 
+%feature("director:except") {
+    if ($error == NULL)
+        return;
+
+    PyObject *exc, *val, *tb;
+    PyErr_Fetch(&exc, &val, &tb);
+    PyErr_NormalizeException(&exc, &val, &tb);
+
+    PyObject* exc_py = PyObject_GetAttrString(exc, "__name__");
+    std::string exc_str = PyUnicode_AsUTF8(exc_py);
+
+    std::string val_str;
+    if (val != NULL) {
+        PyObject* val_py = PyObject_Str(val);
+        val_str += PyUnicode_AsUTF8(val_py);
+        Py_XDECREF(val_py);
+    }
+
+    Py_XDECREF(exc_py);
+    Py_XDECREF(exc);
+    Py_XDECREF(val);
+    Py_XDECREF(tb);
+
+    std::string err_msg("'$symname' | " + exc_str + val_str);
+    Swig::DirectorMethodException::raise(err_msg.c_str());
+}
+
 %module(directors="1") pyqryptonight
 %{
     #include "pow/powhelper.h"

@@ -160,8 +160,16 @@ bool Qryptominer::isRunning() {
 
 void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq) {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_event_mutex);
-    if (event_seq == _work_sequence_id) {
-        solutionEvent(nonce);
+    if (event_seq == _work_sequence_id)
+    {
+        try
+        {
+            solutionEvent(nonce);
+        }
+        catch(std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+        }
     }
 }
 
