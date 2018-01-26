@@ -1,30 +1,16 @@
 sudo: required
 dist: trusty
 services: docker
-language: cpp
-python:
-- '3.4'
+language: python
+python: 3.5
 cache:
   timeout: 600
-
-cache:
-  - pip
-  - apt
-
-addons:
-  apt:
-    packages:
-    - git
-    - python3
-    - python3-pip
 
 notifications:
   webhooks:
     urls:
       - secure: "W79aUtJ3BOWVGbTQ0jzIeDvF6Z8byJegtAa9zW6L8Ij9MyfM5sEcJzHDyAnmLVsPf+P3KkzTHS5HYNodznENyeMcLwbFtuiDb1FrprzE+z2YqLrcudDAIjwOCpMmitYnaq9uZyuRuN8LSG7iJxOq3txIrbvRpVxVJZPvH95SzFOtERlPwpGGj4huF6JRFnjInZhxjJ1jQUWGeQni+aeBs2usK63I4kpG430oBnwy2INi2I5+lnSctCIX8SMbh8iXrBGNCJ7uer95xxy6bHh1OfE6PjpmKSn7siIplh70hCMGNwui+ux1cgcH+PTPJ/7ZsyqU+s8surtMnqHowCqZ7vK/N/cmI8rT8DGrfL+hwBMerb1NfWWRw1756f8vYmEgdS5pcb84tZ6p9P48Gh+Dx49dI9+H5r4CrM7B6/yXgklijqcBScHLBXs6kcdUvVteTyT2jHyme/dRxlFjdgcWlm9H/pR2xDHcSp0I7fl0YlCai0/d0z85sWz2brcZ+SKqxxEQTm8oDrWaadNBr8h6b1/tpc539/WMw2ONjCG3+y/I5T2gMbXdcc/KxHQBmpcFWpdQBarjs5TLQ9LyqKX1yBBSCJGC56+U0rPcQML0BZNnKwNKKvogY3izFd6hhmXDQ5W4l6wZS/taup1XWYU4+XjBkNursAKcttyoxfu0JMw="
       
-########################
-########################
 jobs:
   include:
   ######################## XENIAL - TESTS
@@ -73,10 +59,7 @@ jobs:
 #    - CMAKE_ARGS='-DBUILD_PYTHON=ON'
 #    script:
 #    - "./travis/build.sh"
-#
-#  ########################
-#  - stage: test_deployment
-#    script: echo "TODO..."
+
 
   ########################
   - stage: publish
@@ -87,7 +70,7 @@ jobs:
     - PLATFORM='xenial'
     - DEPLOY='TRUE'
     script:
-    - sudo pip3 install -U pip setuptools twine
+    - sudo pip install -U pip setuptools twine
     - "./travis/build.sh"
 
     deploy:
