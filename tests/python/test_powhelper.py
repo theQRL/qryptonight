@@ -36,9 +36,7 @@ class TestPowHelper(TestCase):
 
         parent_difficulty = StringToUInt256("5000")
 
-        ph.clearTimestamps()
-        ph.addTimestamp(1)
-        current_difficulty = ph.getDifficulty(timestamp=105,
+        current_difficulty = ph.getDifficulty(measurement=104,
                                               parent_difficulty=parent_difficulty)
 
         expected_difficulty = '4644'

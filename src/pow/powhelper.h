@@ -38,7 +38,7 @@ public:
 
     virtual ~PoWHelper()=default;
 
-    std::vector<uint8_t> getDifficulty(uint64_t timestamp,
+    std::vector<uint8_t> getDifficulty(uint64_t measurement,
                                        const std::vector<uint8_t> &parent_difficulty);
 
     std::vector<uint8_t> getBoundary(const std::vector<uint8_t> &difficulty);
@@ -46,12 +46,7 @@ public:
     static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
     static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
-    void addTimestamp(uint64_t timestamp);
-    void clearTimestamps();
-
 private:
-    uint64_t get_average_delta(uint64_t timestamp);
-
     std::deque<uint64_t> prev_timestamps;
 
     long double _Kp;

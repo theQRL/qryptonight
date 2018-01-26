@@ -38,52 +38,16 @@ PoWHelper::PoWHelper(int64_t kp,
 {
 }
 
-void PoWHelper::addTimestamp(uint64_t timestamp)
-{
-    prev_timestamps.push_back(timestamp);
-
-    while(prev_timestamps.size() > _history_size)
-    {
-        prev_timestamps.pop_front();
-    }
-}
-
-void PoWHelper::clearTimestamps()
-{
-    prev_timestamps.clear();
-}
-
-uint64_t PoWHelper::get_average_delta(uint64_t timestamp)
-{
-    uint64_t sum_delta {0};
-    size_t prev_size = prev_timestamps.size();
-
-    if (prev_size == 0)
-    {
-        return _set_point;
-    }
-
-    for(size_t i = 1; i < prev_size-1; i++)
-    {
-        sum_delta += prev_timestamps[i-1] - prev_timestamps[i];
-    }
-
-    sum_delta += timestamp - prev_timestamps[prev_size-1];
-
-    return sum_delta / prev_size;
-}
-
-std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t timestamp,
+std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
                                               const std::vector<uint8_t> &parent_difficulty_vec)
 {
     const uint256_t _difficulty_lower_bound = 2;                                // To avoid issues with the target
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
 
     auto parent_difficulty = fromByteVector(parent_difficulty_vec);
-    const uint64_t delta = get_average_delta(timestamp);
 
     // calculate adjustment factor and apply boundaries
-    bigint adjustment = bigint(_Kp - _Kp*delta/_set_point);
+    bigint adjustment = bigint(_Kp - _Kp*measurement/_set_point);
 
     if (adjustment > _adjfact_upper)
     {
