@@ -27,6 +27,9 @@
 #include <chrono>
 #include <netinet/in.h>
 
+#define HASHRATE_MEASUREMENT_CYCLE 100
+#define HASHRATE_MEASUREMENT_FACTOR 10
+
 Qryptominer::Qryptominer() {
     _eventThread = std::make_unique<std::thread>([&]() { _eventThreadWorker(); });
 }
@@ -106,10 +109,10 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
                         if (thread_idx == 0) {
                             threadTime = std::chrono::high_resolution_clock::now();
                             std::chrono::duration<double, std::milli> delta = threadTime - referenceTime;
-                            if (delta.count() + drift > 1000) {
-                                drift = delta.count() + drift - 1000;
+                            if (delta.count() + drift > HASHRATE_MEASUREMENT_CYCLE) {
+                                drift = delta.count() + drift - HASHRATE_MEASUREMENT_CYCLE;
                                 referenceTime = std::chrono::high_resolution_clock::now();
-                                _hash_per_sec = 0 + _hash_count;
+                                _hash_per_sec = _hash_count * HASHRATE_MEASUREMENT_FACTOR;
                                 _hash_count = 0;
                             }
                         }
