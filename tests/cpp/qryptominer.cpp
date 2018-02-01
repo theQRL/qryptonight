@@ -134,7 +134,6 @@ namespace {
         };
 
         qm.start(input, 0, target, 4);
-        ASSERT_TRUE(qm.isRunning());
         sleep(3);
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 
