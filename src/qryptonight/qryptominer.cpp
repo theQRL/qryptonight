@@ -70,7 +70,7 @@ uint32_t Qryptominer::hashRate() {
 void Qryptominer::start(const std::vector<uint8_t> &input,
                         size_t nonceOffset,
                         const std::vector<uint8_t> &target,
-                        uint8_t thread_count) {
+                        uint32_t thread_count) {
     cancel();
     _work_sequence_id++;
 
@@ -84,6 +84,11 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
     _hash_per_sec = 0;
 
     std::lock_guard<std::recursive_timed_mutex> lock_runningThreads(_runningThreads_mutex);
+
+    if (thread_count==0)
+    {
+        thread_count = std::thread::hardware_concurrency();
+    }
 
     for (uint32_t thread_idx = 0; thread_idx < thread_count; thread_idx++) {
         _runningThreads.emplace_back(

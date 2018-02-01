@@ -45,7 +45,7 @@ public:
     void start(const std::vector<uint8_t> &input,
                size_t nonceOffset,
                const std::vector<uint8_t> &target,
-               uint8_t thread_count = 1);
+               uint32_t thread_count = 1);
 
     void cancel();
     bool isRunning();
