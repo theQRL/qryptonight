@@ -134,10 +134,13 @@ namespace {
         };
 
         qm.start(input, 0, target, 4);
+        ASSERT_TRUE(qm.isRunning());
         sleep(3);
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 
         EXPECT_FALSE(qm.solutionAvailable());
+        qm.cancel();
+        ASSERT_FALSE(qm.isRunning());
     }
 
     TEST(Qryptominer, RunAndCancel) {
@@ -157,6 +160,7 @@ namespace {
         qm.start(input, 0, boundary);
         sleep(1);
         qm.cancel();
+        ASSERT_FALSE(qm.isRunning());
 
         ASSERT_FALSE(qm.solutionAvailable());
     }
@@ -183,6 +187,8 @@ namespace {
             std::this_thread::sleep_for(500ms);
             qm.cancel();
         }
+
+        ASSERT_FALSE(qm.isRunning());
     }
 
 }

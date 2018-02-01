@@ -30,6 +30,19 @@
 #define HASHRATE_MEASUREMENT_CYCLE 100
 #define HASHRATE_MEASUREMENT_FACTOR 10
 
+class ScopedCounter
+{
+public:
+    ScopedCounter(std::atomic<std::uint32_t> &counter): _counter(counter){
+        _counter++;
+    }
+    ~ScopedCounter() {
+        _counter--;
+    }
+
+    std::atomic<std::uint32_t> &_counter;
+};
+
 Qryptominer::Qryptominer() {
     _eventThread = std::make_unique<std::thread>([&]() { _eventThreadWorker(); });
 }
@@ -88,7 +101,7 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
     for (uint32_t thread_idx = 0; thread_idx < thread_count; thread_idx++) {
         _runningThreads.emplace_back(
                 std::make_unique<std::thread>([&](uint32_t thread_idx, uint8_t thread_count) {
-                    _runningThreads_count++;
+                    ScopedCounter thread_counter(_runningThreads_count);
 
                     Qryptonight qn;
                     auto tmp_input(_input);
@@ -140,8 +153,6 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
                         current_nonce += thread_count;
                     }
-
-                    _runningThreads_count++;
                 }, thread_idx, thread_count));
     }
 }
@@ -159,6 +170,11 @@ void Qryptominer::cancel() {
 
 bool Qryptominer::isRunning() {
     return _runningThreads_count > 0;
+}
+
+std::uint32_t Qryptominer::runningThreadCount()
+{
+    return _runningThreads_count;
 }
 
 void Qryptominer::_solutionEvent(uint32_t nonce, uint64_t event_seq) {
