@@ -66,8 +66,6 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
         difficulty_delta = adjustment < 0 ? -1 : 1;
     }
 
-    std::cout << difficulty_delta << std::endl;
-
     // calculate difficulty and apply boundaries
     bigint difficulty = parent_difficulty + difficulty_delta;
 

@@ -49,6 +49,7 @@ public:
 
     void cancel();
     bool isRunning();
+    std::uint32_t runningThreadCount();
 
     virtual void solutionEvent(uint32_t nonce);
 
@@ -61,6 +62,7 @@ public:
 protected:
     void _solutionEvent(uint32_t value, uint64_t event_seq);
     void _eventThreadWorker();
+    void _miningThreadWorker();
 
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
