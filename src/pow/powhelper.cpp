@@ -29,11 +29,13 @@ PoWHelper::PoWHelper(int64_t kp,
                      uint64_t set_point,
                      int64_t adjfact_lower,
                      int64_t adjfact_upper,
+                     int64_t adj_quantization,
                      uint16_t history_size)
 : _Kp(kp),
   _set_point(set_point),
   _adjfact_lower(adjfact_lower),
   _adjfact_upper(adjfact_upper),
+  _adj_quantization(adj_quantization),
   _history_size(history_size)
 {
 }
@@ -58,8 +60,17 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
         adjustment = bigint(_adjfact_lower);
     }
 
+    bigint difficulty_delta = (parent_difficulty * adjustment) / _adj_quantization;
+
+    if (difficulty_delta == 0 &&  adjustment != 0){
+        difficulty_delta = adjustment < 0 ? -1 : 1;
+    }
+
+    std::cout << difficulty_delta << std::endl;
+
     // calculate difficulty and apply boundaries
-    bigint difficulty = parent_difficulty + (parent_difficulty * adjustment) / 1024;
+    bigint difficulty = parent_difficulty + difficulty_delta;
+
 
     difficulty = std::max<bigint>(difficulty, _difficulty_lower_bound);
     difficulty = std::min<bigint>(difficulty, _difficulty_upper_bound);

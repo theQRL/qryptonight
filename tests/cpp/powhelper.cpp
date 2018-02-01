@@ -117,4 +117,21 @@ namespace {
         EXPECT_EQ(8517, fromByteVector(answer));
     }
 
+    TEST(PoWHelper, DifficultyFlatQuantization) {
+        PoWHelper ph;
+        std::vector<uint8_t> answer;
+
+        answer = ph.getDifficulty(10, toByteVector(2) );
+        EXPECT_EQ(3, fromByteVector(answer));
+
+        answer = ph.getDifficulty(10, toByteVector(3) );
+        EXPECT_EQ(4, fromByteVector(answer));
+
+        answer = ph.getDifficulty(10, toByteVector(500) );
+        EXPECT_EQ(540, fromByteVector(answer));
+
+        answer = ph.getDifficulty(70, toByteVector(5) );
+        EXPECT_EQ(4, fromByteVector(answer));
+    }
+
 }

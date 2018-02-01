@@ -34,6 +34,7 @@ public:
                         uint64_t set_point=60,
                         int64_t adjfact_lower=-1000,
                         int64_t adjfact_upper=+1000,
+                        int64_t adj_quantization=1024,
                         uint16_t history_size = 10);
 
     virtual ~PoWHelper()=default;
@@ -53,6 +54,7 @@ private:
     uint64_t _set_point;
     int64_t _adjfact_lower;
     int64_t _adjfact_upper;
+    int64_t _adj_quantization;
     uint16_t _history_size;
 };
 
