@@ -127,15 +127,26 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
             }
         }
 #else
-        for (hwloc_obj_t cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_CACHE, NULL); cache; cache = cache->next_cousin )
+        hwloc_obj_t obj;
+
+        for(obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0); obj; obj = obj->parent)
+        {
+            if(obj->type == HWLOC_OBJ_CACHE) cache = obj;
+        }
+        for (; cache; cache = cache->next_cousin)
         {
             thread_count += cache->attr->cache.size / 2097152;
         }
 #endif
 
-        if (!thread_count || thread_count > 4 * std::thread::hardware_concurrency())
+        if (thread_count > 4 * hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE))
         {
-            thread_count = 4 * std::thread::hardware_concurrency();
+            thread_count = 4 * hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
+        }
+
+        if (!thread_count)
+        {
+            thread_count = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
         }
 
         hwloc_topology_destroy(topology);
