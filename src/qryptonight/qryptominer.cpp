@@ -101,19 +101,20 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
     if (thread_count==0)
     {
+        hwloc_obj_t cache;
         hwloc_topology_t topology;
         hwloc_topology_init(&topology);
         hwloc_topology_load(topology);
 
 #if HWLOC_API_VERSION >= 0x00020000
-        for (hwloc_obj_t cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, cache) )
+        for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, cache) )
         {
             thread_count += cache->attr->cache.size / 2097152;
         }
 
         if (!thread_count)
         {
-            for (hwloc_obj_t cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, cache) )
+            for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, cache) )
             {
                 thread_count += cache->attr->cache.size / 2097152;
             }
@@ -121,7 +122,7 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
         if (!thread_count)
         {
-            for (hwloc_obj_t cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, cache) )
+            for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, cache) )
             {
                 thread_count += cache->attr->cache.size / 2097152;
             }
