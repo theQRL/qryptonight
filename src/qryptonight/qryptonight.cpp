@@ -65,9 +65,16 @@ std::vector<uint8_t> Qryptonight::hash(std::vector<uint8_t> input)
 {
     std::vector<uint8_t> output(32);
 
-    cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, !bHaveAes, false>(input.data(), input.size(),
+    if (bHaveAes)
+    {
+        cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
                                                                             output.data(),
                                                                             _context);
+    } else {
+        cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
+                                                                            output.data(),
+                                                                            _context);
+    }
 
     return output;
 };
