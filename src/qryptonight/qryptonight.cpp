@@ -24,11 +24,18 @@
 #include <xmrstak/backend/cpu/crypto/cryptonight.h>
 #include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
 #include <iostream>
+#include <cpuid.h>
 #include "qryptonight.h"
 
 Qryptonight::Qryptonight()
 {
     size_t init_res;
+    constexpr uint32_t AESNI_BIT = 1 << 25;
+    constexpr uint32_t eax = 1, ecx = 0;
+    uint32_t cpu_info[4];
+
+    __cpuid_count(eax, ecx, cpu_info[0], cpu_info[1], cpu_info[2], cpu_info[3]);
+    bHaveAes = (cpu_info[2] & AESNI_BIT) != 0;
 
     // First try fast mem
     init_res = cryptonight_init(1, 1, &_last_msg);
@@ -58,7 +65,7 @@ std::vector<uint8_t> Qryptonight::hash(std::vector<uint8_t> input)
 {
     std::vector<uint8_t> output(32);
 
-    cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
+    cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, !bHaveAes, false>(input.data(), input.size(),
                                                                             output.data(),
                                                                             _context);
 

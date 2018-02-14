@@ -41,6 +41,7 @@ public:
 protected:
     alloc_msg _last_msg = { nullptr };
     cryptonight_ctx *_context;
+    bool bHaveAes;
 };
 
 #endif //QRYPTONIGHT_QRYPTONIGHT_H
