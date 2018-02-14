@@ -26,6 +26,7 @@
 #include <iostream>
 #include <chrono>
 #include <netinet/in.h>
+#include <hwloc.h>
 
 #define HASHRATE_MEASUREMENT_CYCLE 100
 #define HASHRATE_MEASUREMENT_FACTOR 10
@@ -100,7 +101,56 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
     if (thread_count==0)
     {
-        thread_count = std::thread::hardware_concurrency();
+        hwloc_obj_t cache;
+        hwloc_topology_t topology;
+        hwloc_topology_init(&topology);
+        hwloc_topology_load(topology);
+
+#if HWLOC_API_VERSION >= 0x00020000
+        for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L4CACHE, cache) )
+        {
+            thread_count += cache->attr->cache.size / 2097152;
+        }
+
+        if (!thread_count)
+        {
+            for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L3CACHE, cache) )
+            {
+                thread_count += cache->attr->cache.size / 2097152;
+            }
+        }
+
+        if (!thread_count)
+        {
+            for (cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, NULL); cache; cache = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_L2CACHE, cache) )
+            {
+                thread_count += cache->attr->cache.size / 2097152;
+            }
+        }
+#else
+        hwloc_obj_t obj;
+
+        for(obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0); obj; obj = obj->parent)
+        {
+            if(obj->type == HWLOC_OBJ_CACHE) cache = obj;
+        }
+        for (; cache; cache = cache->next_cousin)
+        {
+            thread_count += cache->attr->cache.size / 2097152;
+        }
+#endif
+
+        if (thread_count > 4 * hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE))
+        {
+            thread_count = 4 * hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
+        }
+
+        if (!thread_count)
+        {
+            thread_count = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
+        }
+
+        hwloc_topology_destroy(topology);
     }
 
     for (uint32_t thread_idx = 0; thread_idx < thread_count; thread_idx++) {
