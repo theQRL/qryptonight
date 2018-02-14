@@ -64,6 +64,8 @@ protected:
     void _eventThreadWorker();
     void _miningThreadWorker();
 
+    uint16_t EstimateOptimalThreadCount();
+
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
     size_t _nonceOffset { 0 };
