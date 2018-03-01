@@ -29,14 +29,12 @@ PoWHelper::PoWHelper(int64_t kp,
                      uint64_t set_point,
                      int64_t adjfact_lower,
                      int64_t adjfact_upper,
-                     int64_t adj_quantization,
-                     uint16_t history_size)
+                     int64_t adj_quantization)
 : _Kp(kp),
   _set_point(set_point),
   _adjfact_lower(adjfact_lower),
   _adjfact_upper(adjfact_upper),
-  _adj_quantization(adj_quantization),
-  _history_size(history_size)
+  _adj_quantization(adj_quantization)
 {
 }
 
@@ -108,7 +106,6 @@ bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector
 
 bool PoWHelper::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
 {
-    Qryptonight qn;
-    auto hash = qn.hash(input);
+    auto hash = _qn.hash(input);
     return passesTarget(hash, target);
 }

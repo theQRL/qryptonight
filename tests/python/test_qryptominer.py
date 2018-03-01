@@ -93,6 +93,7 @@ class TestQryptominer(TestCase):
         output = qn.hash(solution_input)
         print("raw     Hash   ", output)
 
-        self.assertTrue(PoWHelper.verifyInput(solution_input, target))
+        ph = PoWHelper()
+        self.assertTrue(ph.verifyInput(solution_input, target))
         solution_input[4] = 0x20
-        self.assertFalse(PoWHelper.verifyInput(solution_input, target))
+        self.assertFalse(ph.verifyInput(solution_input, target))

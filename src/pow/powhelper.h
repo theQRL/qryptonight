@@ -27,6 +27,7 @@
 #include <vector>
 #include <cstdint>
 #include <deque>
+#include <qryptonight/qryptonight.h>
 
 class PoWHelper {
 public:
@@ -34,8 +35,7 @@ public:
                         uint64_t set_point=60,
                         int64_t adjfact_lower=-1000,
                         int64_t adjfact_upper=+1000,
-                        int64_t adj_quantization=1024,
-                        uint16_t history_size = 10);
+                        int64_t adj_quantization=1024);
 
     virtual ~PoWHelper()=default;
 
@@ -45,17 +45,16 @@ public:
     std::vector<uint8_t> getBoundary(const std::vector<uint8_t> &difficulty);
 
     static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
-    static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
+    bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
 private:
-    std::deque<uint64_t> prev_timestamps;
-
     long double _Kp;
     uint64_t _set_point;
     int64_t _adjfact_lower;
     int64_t _adjfact_upper;
     int64_t _adj_quantization;
-    uint16_t _history_size;
+
+    Qryptonight _qn;
 };
 
 #endif //QRYPTONIGHT_POW_Impl_H
