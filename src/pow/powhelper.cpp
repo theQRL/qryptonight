@@ -74,7 +74,7 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
     return toByteVector(uint256_t(difficulty));
 }
 
-std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficulty_vec)
+std::vector<uint8_t> PoWHelper::getTarget(const std::vector<uint8_t> &difficulty_vec)
 {
     std::vector<uint8_t> boundary(32, 0);
 
@@ -86,7 +86,9 @@ std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficul
     bigint max_boundary = (bigint(1) << 256)-bigint(1);
     uint256_t tmp2 = uint256_t(max_boundary/bigint(difficulty));
 
-    return toByteVector(tmp2);
+    auto byteVector = toByteVector(tmp2);
+    std::reverse(byteVector.begin(), byteVector.end());
+    return byteVector;
 }
 
 bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)

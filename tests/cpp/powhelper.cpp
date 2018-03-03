@@ -24,21 +24,76 @@
 #include <qryptonight/qryptominer.h>
 #include <pow/powhelper.h>
 #include <misc/bignum.h>
-#include <misc/strbignum.h>
 #include "gtest/gtest.h"
 
 namespace {
-    TEST(PoWHelper, BoundaryCalculationDifficultyZero) {
+    TEST(PoWHelper, TargetCalculationDifficultyZero) {
         PoWHelper ph;
 
         std::vector<uint8_t> zeros(32, 0);
 
-        auto boundary1 = ph.getBoundary(zeros);
+        auto target = ph.getTarget(zeros);
 
-        EXPECT_EQ(zeros, boundary1);
+        EXPECT_EQ(zeros, target);
     }
 
-    TEST(PoWHelper, BoundaryCalculationDifficultyOne) {
+    TEST(PoWHelper, TargetCalculationDifficultyOne) {
+        PoWHelper ph;
+
+        auto difficulty = toByteVector(1);
+
+        std::vector<uint8_t> expected_difficulty{
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        };
+
+        EXPECT_EQ(expected_difficulty, difficulty);
+
+        auto target = ph.getTarget(difficulty);
+
+        std::cout << printByteVector(target) << std::endl;
+
+        std::vector<uint8_t> expected_target{
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+        };
+
+        EXPECT_EQ(expected_target, target);
+    }
+
+    TEST(PoWHelper, TargetCalculationDifficultyTwo) {
+        PoWHelper ph;
+
+        auto difficulty = toByteVector(2);
+
+        std::vector<uint8_t> expected_difficulty{
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+        };
+
+        EXPECT_EQ(expected_difficulty, difficulty);
+
+        auto target = ph.getTarget(difficulty);
+
+        std::cout << printByteVector(target) << std::endl;
+
+        std::vector<uint8_t> expected_target{
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
+        };
+
+        EXPECT_EQ(expected_target, target);
+    }
+
+    TEST(PoWHelper, TargetCalculationDifficultyLow) {
         PoWHelper ph;
 
         auto difficulty = toByteVector(1000000);
@@ -52,34 +107,35 @@ namespace {
 
         EXPECT_EQ(expected_difficulty, difficulty);
 
-        auto boundary1 = ph.getBoundary(difficulty);
+        auto target = ph.getTarget(difficulty);
+        std::cout << printByteVector(target) << std::endl;
 
-        std::vector<uint8_t> expected_boundary{
-                0x00, 0x00, 0x10, 0xc6, 0xf7, 0xa0, 0xb5, 0xed,
-                0x8d, 0x36, 0xb4, 0xc7, 0xf3, 0x49, 0x38, 0x58,
-                0x36, 0x21, 0xfa, 0xfc, 0x8b, 0x00, 0x79, 0xa2,
-                0x83, 0x4d, 0x26, 0xfa, 0x3f, 0xcc, 0x9e, 0xa9
+        std::vector<uint8_t> expected_target{
+                0xa9, 0x9e, 0xcc, 0x3f, 0xfa, 0x26, 0x4d, 0x83,
+                0xa2, 0x79, 0x00, 0x8b, 0xfc, 0xfa, 0x21, 0x36,
+                0x58, 0x38, 0x49, 0xf3, 0xc7, 0xb4, 0x36, 0x8d,
+                0xed, 0xb5, 0xa0, 0xf7, 0xc6, 0x10, 0x00, 0x00
         };
 
-        EXPECT_EQ(expected_boundary, boundary1);
+        EXPECT_EQ(expected_target, target);
     }
 
-    TEST(PoWHelper, BoundaryCalculationDifficulty2) {
+    TEST(PoWHelper, TargetCalculationDifficulty2) {
         PoWHelper ph;
 
         auto difficulty = toByteVector(1000488);
-        auto boundary1 = ph.getBoundary(difficulty);
+        auto target = ph.getTarget(difficulty);
 
-        std::vector<uint8_t> expected_boundary{
-                0x00, 0x00, 0x10, 0xc4, 0xdf, 0x53, 0xeb, 0xc0,
-                0x45, 0xd3, 0xc9, 0xf3, 0x73, 0xae, 0xa2, 0xc3,
-                0xe6, 0xef, 0xbf, 0xb5, 0x31, 0xc3, 0xbf, 0xa2,
-                0x54, 0x48, 0x81, 0x39, 0x1b, 0xf9, 0xf2, 0xf5
+        std::vector<uint8_t> expected_target{
+                0xf5, 0xf2, 0xf9, 0x1b, 0x39, 0x81, 0x48, 0x54,
+                0xa2, 0xbf, 0xc3, 0x31, 0xb5, 0xbf, 0xef, 0xe6,
+                0xc3, 0xa2, 0xae, 0x73, 0xf3, 0xc9, 0xd3, 0x45,
+                0xc0, 0xeb, 0x53, 0xdf, 0xc4, 0x10, 0x00, 0x00
         };
 
-//        std::cout << std::endl << printByteVector(boundary1) << std::endl;
+        std::cout << printByteVector(target) << std::endl;
 
-        EXPECT_EQ(expected_boundary, boundary1);
+        EXPECT_EQ(expected_target, target);
     }
 
     TEST(PoWHelper, DifficultyOne) {
@@ -132,6 +188,35 @@ namespace {
 
         answer = ph.getDifficulty(70, toByteVector(5) );
         EXPECT_EQ(4, fromByteVector(answer));
+    }
+
+    TEST(PoWHelper, DifficultyTarget) {
+        PoWHelper ph;
+
+        std::vector<uint8_t> difficulty;
+
+        difficulty = ph.getDifficulty(30, toByteVector(1000000) );
+        auto target = ph.getTarget(difficulty);
+
+        EXPECT_EQ(1048828, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(40, toByteVector(1000000) );
+        EXPECT_EQ(1032226, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(55, toByteVector(1000000) );
+        EXPECT_EQ(1007812, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(60, toByteVector(1000000) );
+        EXPECT_EQ(1000000, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(70, toByteVector(1000000) );
+        EXPECT_EQ(984375, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(80, toByteVector(1000000) );
+        EXPECT_EQ(967774, fromByteVector(difficulty));
+
+        difficulty = ph.getDifficulty(90, toByteVector(1000000) );
+        EXPECT_EQ(951172, fromByteVector(difficulty));
     }
 
 }
