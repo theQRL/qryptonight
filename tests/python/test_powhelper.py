@@ -20,18 +20,18 @@ class TestPowHelper(TestCase):
             0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x42, 0x40
         )
 
-        boundary = ph.getBoundary(difficulty)
+        target = ph.getTarget(difficulty)
 
-        expected_boundary = (
-            0, 0, 16, 198, 247, 160, 181, 237,
-            141, 54, 180, 199, 243, 73, 56, 88,
-            54, 33, 250, 252, 139, 0, 121, 162,
-            131, 77, 38, 250, 63, 204, 158, 169
+        expected_target = (
+            169, 158, 204, 63, 250, 38, 77, 131,
+            162, 121, 0, 139, 252, 250, 33, 54,
+            88, 56, 73, 243, 199, 180, 54, 141,
+            237, 181, 160, 247, 198, 16, 0, 0
         )
 
-        self.assertEqual(expected_boundary, boundary)
+        self.assertEqual(expected_target, target)
 
-    def test_adaptive_boundary(self):
+    def test_adaptive_target(self):
         ph = PoWHelper()
 
         parent_difficulty = StringToUInt256("5000")
@@ -47,7 +47,7 @@ class TestPowHelper(TestCase):
 
         self.assertEqual(expected_difficulty, UInt256ToString(current_difficulty))
 
-        boundary = ph.getBoundary(current_difficulty)
-        expected_boundary = "24933697079525451210932597977753640795277774475805461679469763998258641180"
+        target = ph.getTarget(current_difficulty)
+        expected_target = "12766941454368345787240450318120704813017110301439674670851728194227068997120"
 
-        self.assertEqual(expected_boundary, UInt256ToString(boundary))
+        self.assertEqual(expected_target, UInt256ToString(target))
