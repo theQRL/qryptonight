@@ -14,5 +14,6 @@ using bigint = boost::multiprecision::number<boost::multiprecision::cpp_int_back
 uint256_t fromByteVector(const std::vector<uint8_t> &vec);
 std::vector<uint8_t> toByteVector(uint256_t);
 std::string printByteVector(const std::vector<uint8_t> &vec);
+std::string printByteVector2(const std::vector<uint8_t> &vec);
 
 #endif //QRYPTONIGHT_BIGNUM_H

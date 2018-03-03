@@ -83,7 +83,7 @@ std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficul
     if (difficulty == 0)
         return boundary;
 
-    bigint max_boundary = bigint(1) << 256;
+    bigint max_boundary = (bigint(1) << 256)-bigint(1);
     uint256_t tmp2 = uint256_t(max_boundary/bigint(difficulty));
 
     return toByteVector(tmp2);
@@ -92,12 +92,15 @@ std::vector<uint8_t> PoWHelper::getBoundary(const std::vector<uint8_t> &difficul
 bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
 {
     // The hash needs to be below the target (both 32 bytes)
+    // Monero uses little endian.. we need to check in reverse order
     for(size_t i = 0; i < 32; i++)
     {
-        if (hash[i] > target[i])
+        const uint8_t h = hash[31-i];
+        const uint8_t t = target[31-i];
+        if (h > t)
             return false;
 
-        if (hash[i] < target[i])
+        if (h < t)
             return true;
     }
 
@@ -106,6 +109,7 @@ bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector
 
 bool PoWHelper::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
 {
-    auto hash = _qn.hash(input);
+    Qryptonight qn;
+    auto hash = qn.hash(input);
     return passesTarget(hash, target);
 }
