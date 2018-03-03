@@ -42,3 +42,15 @@ std::string printByteVector(const std::vector<uint8_t> &vec)
 
     return ss.str();
 }
+
+std::string printByteVector2(const std::vector<uint8_t> &vec)
+{
+    std::stringstream ss;
+
+    for(uint8_t i=0; i<32; i++)
+    {
+        ss << std::setfill('0') << std::setw(2) << std::hex << (int)(vec[i]);
+    }
+
+    return ss.str();
+}
