@@ -209,7 +209,7 @@ void Qryptominer::_eventThreadWorker() {
                             [=] { return !_eventQueue.empty() || _stop_eventThread; });
 
         if (!_eventQueue.empty()) {
-            auto &event = _eventQueue.front();
+            auto event = _eventQueue.front();
             _eventQueue.pop_front();
             queue_lock.unlock();
             _solutionEvent(event.nonce, event.event_seq);
