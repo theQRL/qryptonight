@@ -26,7 +26,7 @@ class TestQryptominer(TestCase):
             0x1E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
             0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
             0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
-            0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xFF
+            0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0x00
         ]
 
         # Create a customized miner
@@ -42,11 +42,11 @@ class TestQryptominer(TestCase):
         time.sleep(2)
 
         # This property has been just created in the python custom class when the event is received
-        self.assertEqual(1, qm.python_nonce)
+        self.assertEqual(6, qm.python_nonce)
 
         # Now check wrapper values
         self.assertEqual(True, qm.solutionAvailable())
-        self.assertEqual(1, qm.solutionNonce())
+        self.assertEqual(6, qm.solutionNonce())
 
     def test_miner_verify(self):
         class CustomQMiner(Qryptominer):
