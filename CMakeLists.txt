@@ -5,9 +5,6 @@ cmake_minimum_required(VERSION 3.5)
 project(qryptonight)
 
 set(CMAKE_CXX_STANDARD 14)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_ERROR_DEPRECATED FALSE)
@@ -24,13 +21,19 @@ message(STATUS "GOLANG WRAPPER " ${BUILD_GO})
 message(STATUS "PYTHON WRAPPER " ${BUILD_PYTHON})
 message(STATUS "WEBASSEMBLY    " ${BUILD_WEBASSEMBLY})
 
+if(WIN32)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -DWIN32_LEAN_AND_MEAN)
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+endif()
+
 if (BUILD_PYTHON OR BUILD_GO)
     find_package(SWIG REQUIRED)
     INCLUDE(${SWIG_USE_FILE})
     unset(SWIG_LANG_TYPE)
 endif ()
 
-FIND_PACKAGE(Boost 1.58)
+FIND_PACKAGE(Boost 1.58 REQUIRED)
 
 ################################################################################
 # Find hwloc
@@ -68,9 +71,25 @@ else()
     add_definitions("-DCONF_NO_HWLOC")
 endif()
 
-if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
-    set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
+if(WIN32 AND HWLOC_ENABLE)
+    execute_process(COMMAND dumpbin.exe /SYMBOLS /NOLOGO
+        ${HWLOC}
+        OUTPUT_VARIABLE HWLOC_SYMS
+        RESULT_VARIABLE DUMPBIN_RESULT)
+
+        # NOTE: On Windows, currently the environment variable HWLOC_ROOT is required
+        # and should be set with the path to of an open-mpi HWLOC Windows distribution.
+        if(DUMPBIN_RESULT EQUAL 0)
+            string(REGEX MATCH "__IMPORT_DESCRIPTOR_[^\n]+" HWLOC_DLLNAME ${HWLOC_SYMS})
+            string(REGEX REPLACE "__IMPORT_DESCRIPTOR_(.*)" "\\1.dll" HWLOC_DLLNAME ${HWLOC_DLLNAME})
+            get_filename_component(HWLOC_ROOT ${HWLOC} DIRECTORY)
+            get_filename_component(HWLOC_DLL "${HWLOC_ROOT}/../bin/${HWLOC_DLLNAME}" ABSOLUTE)
+        endif()
+endif()
+
+if(NOT WIN32)
+    set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
+    set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
 endif()
 
 include_directories(
@@ -151,22 +170,28 @@ if (BUILD_TESTS)
 
     ###########################
     include(CTest)
-    enable_testing()
 
     add_executable(qryptonight_test
             ${TEST_QRYPTONIGHT_SRC}
             ${LIB_QRYPTONIGHT_SRC}
             ${REF_CRYPTONIGHT_SRC}
             )
+    add_dependencies(qryptonight_test Boost::boost)
+
 
     target_include_directories( qryptonight_test PRIVATE
-            ${LIB_QRYPTONIGHT_INCLUDES} )
+        ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS})
+
 
     target_link_libraries(qryptonight_test
             gtest_main
             ${REF_CRYPTONIGHT_LIBS}
             cryptonight-c-lib
             )
+
+    if(WIN32)
+        target_link_libraries(qryptonight_test wsock32 ws2_32)
+    endif()
 
     add_test(gtest ${PROJECT_BINARY_DIR}/qryptonight_test)
 
@@ -211,10 +236,26 @@ if (BUILD_PYTHON)
             ${REF_CRYPTONIGHT_LIBS}
             cryptonight-c-lib)
 
+    if(WIN32)
+        swig_link_libraries(pyqryptonight wsock32 ws2_32)
+    endif()
+
     include_directories(
             ${PYTHON_INCLUDE_PATH}
             ${LIB_QRYPTONIGHT_INCLUDES}
+            ${Boost_INCLUDE_DIRS}
     )
+
+    set_target_properties(${SWIG_MODULE_pyqryptonight_REAL_NAME} PROPERTIES DEBUG_POSTFIX "_d")
+
+    if(WIN32 AND HWLOC_ENABLE)
+        add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
+            POST_BUILD
+            COMMENT "Copying HWLOC DLL to package folder"
+            COMMAND ${CMAKE_COMMAND} -E
+              copy_if_different "${HWLOC_DLL}" "${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/")
+    endif()
+
 
     add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
             POST_BUILD
