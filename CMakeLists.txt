@@ -77,8 +77,6 @@ if(WIN32 AND HWLOC_ENABLE)
         OUTPUT_VARIABLE HWLOC_SYMS
         RESULT_VARIABLE DUMPBIN_RESULT)
 
-        # NOTE: On Windows, currently the environment variable HWLOC_ROOT is required
-        # and should be set with the path to of an open-mpi HWLOC Windows distribution.
         if(DUMPBIN_RESULT EQUAL 0)
             string(REGEX MATCH "__IMPORT_DESCRIPTOR_[^\n]+" HWLOC_DLLNAME ${HWLOC_SYMS})
             string(REGEX REPLACE "__IMPORT_DESCRIPTOR_(.*)" "\\1.dll" HWLOC_DLLNAME ${HWLOC_DLLNAME})
@@ -178,10 +176,8 @@ if (BUILD_TESTS)
             )
     add_dependencies(qryptonight_test Boost::boost)
 
-
     target_include_directories( qryptonight_test PRIVATE
         ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS})
-
 
     target_link_libraries(qryptonight_test
             gtest_main
@@ -255,7 +251,6 @@ if (BUILD_PYTHON)
             COMMAND ${CMAKE_COMMAND} -E
               copy_if_different "${HWLOC_DLL}" "${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/")
     endif()
-
 
     add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
             POST_BUILD

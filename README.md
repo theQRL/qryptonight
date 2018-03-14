@@ -40,7 +40,6 @@ pip3 install pyqryptonight
 ```
 
 #### Windows
-
 ```
 TBD
 ```
@@ -56,7 +55,7 @@ Prerequisites:
 - Install [Build Tools for Visual Studio](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017) selecting the *'Visual C++ build tools'* option, or install [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/) selecting the *'Desktop Development for C++ workload'*.
 - Install [Git for Windows](https://gitforwindows.org/) keeping the default option to use git from the command prompt.
 - Install the latest stable [CMake x64 for Windows](https://cmake.org/download/), selecting to add CMake to system or user PATH.
-- Install [Python 3 Windows x86-64](https://www.python.org/downloads/) selecting the option to '*Add Python 3.x to PATH*'. Optionally change the install location to ```c:\python36```, install the debugging symbols/binaries and disable the path length limit.
+- Install [Python 3 Windows x86-64](https://www.python.org/downloads/) selecting the option to '*Add Python 3.x to PATH*'. Optionally change the install location to ```c:\python36```, install the debugging symbols/binaries, and disable the path length limit.
 - Download [SWIG](http://swig.org/) *(download swigwin)* and extract archive to ```c:\opt```
 - Download [Ninja Build](https://github.com/ninja-build/ninja/releases) and extract ```ninja.exe``` to ```c:\opt\bin```
 
