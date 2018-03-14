@@ -174,7 +174,6 @@ if (BUILD_TESTS)
             ${LIB_QRYPTONIGHT_SRC}
             ${REF_CRYPTONIGHT_SRC}
             )
-    add_dependencies(qryptonight_test Boost::boost)
 
     target_include_directories( qryptonight_test PRIVATE
         ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS})
