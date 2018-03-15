@@ -43,11 +43,11 @@ public:
 	class ReturnToPoolDeleter
 	{
 	public:
-		explicit ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> pool);
+		explicit ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> ptrToOwnerPool);
 		void operator()(Qryptonight* ptrToReleasedObject);
 		void detachFromPool();
 	private:
-		std::weak_ptr<QryptonightPool> _pool;	
+		std::weak_ptr<QryptonightPool> _ptrToOwnerPool;
 	};
 
 	// a std::unique_ptr with a custome deleter that the client will use
@@ -66,11 +66,11 @@ protected:
 	// return the Qryptonight instance back to the pool
 	void add(uniqueQryptonightPtr ptr);
 	
-	// allow mutually exclusive access to _hashers
+	// allow mutually exclusive access to _pool
     mutable std::mutex _mutex;
 	
-	// container for the pool of unused Qryptonight instances
-	std::stack<uniqueQryptonightPtr> _hashers;
+	// container for the unused Qryptonight instances
+	std::stack<uniqueQryptonightPtr> _poolContainer;
 };
 
 #endif //QRYPTONIGHT_QRYPTONIGHTPOOL_H

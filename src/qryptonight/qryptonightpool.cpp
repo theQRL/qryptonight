@@ -23,12 +23,12 @@
 
 #include "qryptonightpool.h"
 
-QryptonightPool::ReturnToPoolDeleter::ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> pool)
-	: _pool(pool) { }
+QryptonightPool::ReturnToPoolDeleter::ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> ptrToOwnerPool)
+	: _ptrToOwnerPool(ptrToOwnerPool) { }
 
 void QryptonightPool::ReturnToPoolDeleter::operator()(Qryptonight* ptrToReleasedObject)
 {
-	if (auto pool = _pool.lock())
+	if (auto pool = _ptrToOwnerPool.lock())
 	{
 		// the pool still exists so attempt to return it back to the pool
 		try
@@ -44,34 +44,36 @@ void QryptonightPool::ReturnToPoolDeleter::operator()(Qryptonight* ptrToReleased
 
 void QryptonightPool::ReturnToPoolDeleter::detachFromPool()
 {
-	_pool.reset();
+	_ptrToOwnerPool.reset();
 }
 
 QryptonightPool::QryptonightPool()
 	: _mutex()
-	, _hashers() { }
+	, _poolContainer() { }
 
 QryptonightPool::~QryptonightPool()
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	while (!_hashers.empty())
+	while (!_poolContainer.empty())
 	{
-		_hashers.top().get_deleter().detachFromPool();
-		_hashers.pop();
+		_poolContainer.top().get_deleter().detachFromPool();
+		_poolContainer.pop();
 	}
 }
 
 QryptonightPool::uniqueQryptonightPtr QryptonightPool::acquire()
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	if (_hashers.empty())
+	if (_poolContainer.empty())
 	{
+		// no Qryptonight intances availabe in the pool so create and return a new one
 		return uniqueQryptonightPtr{new Qryptonight(), ReturnToPoolDeleter(shared_from_this())};
 	}
 	else
 	{
-		auto ptr = std::move(_hashers.top());
-		_hashers.pop();
+		// grab an unused Qryptonight instance from the pool
+		auto ptr = std::move(_poolContainer.top());
+		_poolContainer.pop();
 		return ptr;
 	}
 }
@@ -79,17 +81,17 @@ QryptonightPool::uniqueQryptonightPtr QryptonightPool::acquire()
 void QryptonightPool::add(QryptonightPool::uniqueQryptonightPtr ptr)
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	_hashers.push(std::move(ptr));
+	_poolContainer.push(std::move(ptr));
 }
 
 bool QryptonightPool::empty() const
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	return _hashers.empty();
+	return _poolContainer.empty();
 }
 
 size_t QryptonightPool::size() const
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	return _hashers.size();
+	return _poolContainer.size();
 }
