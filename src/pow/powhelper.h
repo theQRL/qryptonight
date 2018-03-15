@@ -27,7 +27,7 @@
 #include <vector>
 #include <cstdint>
 #include <deque>
-#include <qryptonight/qryptonight.h>
+#include <qryptonight/qryptonightpool.h>
 
 class PoWHelper {
 public:
@@ -45,7 +45,7 @@ public:
     std::vector<uint8_t> getTarget(const std::vector<uint8_t> &difficulty);
 
     static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
-    bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
+    static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
 private:
     long double _Kp;
@@ -54,7 +54,7 @@ private:
     int64_t _adjfact_upper;
     int64_t _adj_quantization;
 
-    Qryptonight _qn;
+    static std::shared_ptr<QryptonightPool> _qnpool;
 };
 
 #endif //QRYPTONIGHT_POW_Impl_H

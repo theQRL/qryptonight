@@ -43,6 +43,8 @@ public:
     std::atomic<std::uint32_t> &_counter;
 };
 
+std::shared_ptr<QryptonightPool> Qryptominer::_qnpool = std::make_shared<QryptonightPool>();
+
 Qryptominer::Qryptominer() {
     _eventThread = std::make_unique<std::thread>([&]() { _eventThreadWorker(); });
 }
@@ -108,7 +110,7 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
                 std::make_unique<std::thread>([&](uint32_t thread_idx, uint8_t thread_count) {
                     ScopedCounter thread_counter(_runningThreads_count);
 
-                    Qryptonight qn;
+                    auto qn = _qnpool->acquire();
                     auto tmp_input(_input);
                     auto p = tmp_input.data();
                     auto nonce = reinterpret_cast<uint32_t *>(p + _nonceOffset);
@@ -121,7 +123,7 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
 
                     while (!_stop_request && !_solution_found) {
                         *nonce = htonl(current_nonce);
-                        auto current_hash = qn.hash(tmp_input);
+                        auto current_hash = qn->hash(tmp_input);
                         _hash_count++;
 
                         if (thread_idx == 0) {

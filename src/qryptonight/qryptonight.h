@@ -34,9 +34,9 @@ public:
     virtual ~Qryptonight();
 
     bool isValid() { return _context != nullptr; }
-    std::string lastError() { return std::string(_last_msg.warning); }
+    std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
 
-    std::vector<uint8_t> hash(std::vector<uint8_t> input);
+    std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
     alloc_msg _last_msg = { nullptr };

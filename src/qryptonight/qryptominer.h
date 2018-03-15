@@ -24,7 +24,7 @@
 #ifndef QRYPTONIGHT_QRYPTOMINER_H
 #define QRYPTONIGHT_QRYPTOMINER_H
 
-#include "qryptonight.h"
+#include "qryptonightpool.h"
 #include <atomic>
 #include <thread>
 #include <mutex>
@@ -93,6 +93,8 @@ protected:
     std::deque<MinerSolutionEvent> _eventQueue;
     std::mutex _eventQueue_mutex;
     std::condition_variable _eventReleased;
+	
+    static std::shared_ptr<QryptonightPool> _qnpool;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H
