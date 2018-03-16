@@ -35,49 +35,49 @@ class QryptonightPool : public std::enable_shared_from_this<QryptonightPool>
 {
 public:
 
-	// a factory function to create new Qryptonight objects
-	using QryptonightFactory = std::function<Qryptonight*()>;
+    // a factory function to create new Qryptonight objects
+    using QryptonightFactory = std::function<Qryptonight*()>;
 
     QryptonightPool(QryptonightFactory factory = [](){ return new Qryptonight(); });
 
     virtual ~QryptonightPool();
 
-	// helper functor to return pointers back to the pool
-	// or delete the pointer if the pool no longer exists
-	class ReturnToPoolDeleter
-	{
-	public:
-		explicit ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> ptrToOwnerPool);
-		void operator()(Qryptonight* ptrToReleasedObject);
-		void detachFromPool();
-	private:
-		std::weak_ptr<QryptonightPool> _ptrToOwnerPool;
-	};
+    // helper functor to return pointers back to the pool
+    // or delete the pointer if the pool no longer exists
+    class ReturnToPoolDeleter
+    {
+    public:
+        explicit ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> ptrToOwnerPool);
+        void operator()(Qryptonight* ptrToReleasedObject);
+        void detachFromPool();
+    private:
+        std::weak_ptr<QryptonightPool> _ptrToOwnerPool;
+    };
 
-	// a std::unique_ptr with a custome deleter that the client will use
-	using uniqueQryptonightPtr = std::unique_ptr<Qryptonight, ReturnToPoolDeleter>;
+    // a std::unique_ptr with a custome deleter that the client will use
+    using uniqueQryptonightPtr = std::unique_ptr<Qryptonight, ReturnToPoolDeleter>;
 
-	// obtain an unused Qryptonight instance from the pool or
-	// create a new one if there are none available
-	uniqueQryptonightPtr acquire();
+    // obtain an unused Qryptonight instance from the pool or
+    // create a new one if there are none available
+    uniqueQryptonightPtr acquire();
 
-	bool empty() const;
-	
-	size_t size() const;
-		
+    bool empty() const;
+
+    size_t size() const;
+
 protected:
 
-	// return the Qryptonight instance back to the pool
-	void add(uniqueQryptonightPtr ptr);
-	
-	// factory function to create the Qryptonight objects
-	QryptonightFactory _factory;
+    // return the Qryptonight instance back to the pool
+    void add(uniqueQryptonightPtr ptr);
 
-	// allow mutually exclusive access to _poolContainer
+    // factory function to create the Qryptonight objects
+    QryptonightFactory _factory;
+
+    // allow mutually exclusive access to _poolContainer
     mutable std::mutex _mutex;
-	
-	// container for the unused Qryptonight instances
-	std::stack<uniqueQryptonightPtr> _poolContainer;
+
+    // container for the unused Qryptonight instances
+    std::stack<uniqueQryptonightPtr> _poolContainer;
 };
 
 #endif //QRYPTONIGHT_QRYPTONIGHTPOOL_H

@@ -25,22 +25,22 @@
 #include "gtest/gtest.h"
 
 namespace {
-	
-	class QryptonightWithRefCount : public Qryptonight
-	{
-	public:
-		QryptonightWithRefCount() : Qryptonight() { ++_instances; }
-		virtual ~QryptonightWithRefCount() { --_instances; }
-		static size_t _instances;
-	};
-	
-	size_t QryptonightWithRefCount::_instances = 0;
-	
-	QryptonightPool::QryptonightFactory factory =
-		[](){ return new QryptonightWithRefCount(); };
 
-	void ValidateHash(QryptonightPool::uniqueQryptonightPtr& qn)
-	{
+    class QryptonightWithRefCount : public Qryptonight
+    {
+    public:
+        QryptonightWithRefCount() : Qryptonight() { ++_instances; }
+        virtual ~QryptonightWithRefCount() { --_instances; }
+        static size_t _instances;
+    };
+
+    size_t QryptonightWithRefCount::_instances = 0;
+
+    QryptonightPool::QryptonightFactory factory =
+        [](){ return new QryptonightWithRefCount(); };
+
+    void ValidateHash(QryptonightPool::uniqueQryptonightPtr& qn)
+    {
         EXPECT_TRUE(qn->isValid());
 
         std::vector<uint8_t> input {
@@ -57,13 +57,13 @@ namespace {
         auto output = qn->hash(input);
 
         EXPECT_EQ(output_expected, output);
-	}
-	
+    }
+
     TEST(QryptoNightPool, Init) {
         auto pool = std::make_shared<QryptonightPool>(factory);
         EXPECT_TRUE(pool->empty());
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
     TEST(QryptoNightPool, Empty) {
@@ -71,38 +71,38 @@ namespace {
 
         auto qn = pool->acquire();
         EXPECT_TRUE(pool->empty());
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-		
-		qn.reset();
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+
+        qn.reset();
         EXPECT_FALSE(pool->empty());
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-	}
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+    }
 
     TEST(QryptoNightPool, AcquireHashReleaseCycle) {
         auto pool = std::make_shared<QryptonightPool>(factory);
 
         auto qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		ValidateHash(qn);
+        ValidateHash(qn);
 
-		qn.reset();
+        qn.reset();
         EXPECT_EQ(pool->size(), 1);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		qn = pool->acquire();
+        qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-		
-		ValidateHash(qn);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		qn.reset();
+        ValidateHash(qn);
+
+        qn.reset();
         EXPECT_EQ(pool->size(), 1);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		pool.reset();
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
+        pool.reset();
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
     TEST(QryptoNightPool, AcquireHashReleaseFour) {
@@ -113,22 +113,22 @@ namespace {
         auto qn3 = pool->acquire();
         auto qn4 = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
 
-		ValidateHash(qn1);
-		ValidateHash(qn2);
-		ValidateHash(qn3);
-		ValidateHash(qn4);
+        ValidateHash(qn1);
+        ValidateHash(qn2);
+        ValidateHash(qn3);
+        ValidateHash(qn4);
 
-		qn1.reset();
-		qn2.reset();
-		qn3.reset();
-		qn4.reset();
+        qn1.reset();
+        qn2.reset();
+        qn3.reset();
+        qn4.reset();
         EXPECT_EQ(pool->size(), 4);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
-		
-		pool.reset();
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
+
+        pool.reset();
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
     TEST(QryptoNightPool, AcquireAndDeletePool) {
@@ -136,17 +136,17 @@ namespace {
 
         auto qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		pool.reset();
+        pool.reset();
 
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-		ValidateHash(qn);
+        ValidateHash(qn);
 
-		qn.reset();
-		
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
+        qn.reset();
+
+        EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
 }

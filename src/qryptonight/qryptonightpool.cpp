@@ -24,78 +24,78 @@
 #include "qryptonightpool.h"
 
 QryptonightPool::ReturnToPoolDeleter::ReturnToPoolDeleter(std::weak_ptr<QryptonightPool> ptrToOwnerPool)
-	: _ptrToOwnerPool(ptrToOwnerPool) { }
+    : _ptrToOwnerPool(ptrToOwnerPool) { }
 
 void QryptonightPool::ReturnToPoolDeleter::operator()(Qryptonight* ptrToReleasedObject)
 {
-	if (auto pool = _ptrToOwnerPool.lock())
-	{
-		// the pool still exists so attempt to return it back to the pool
-		try
-		{
-			pool->add(uniqueQryptonightPtr{ptrToReleasedObject, ReturnToPoolDeleter(pool)});
-			return;
-		}
-		catch(const std::bad_alloc&) { }
-	}
-	// the pool is gone or cannot be added back so delete the object
-	delete ptrToReleasedObject;
+    if (auto pool = _ptrToOwnerPool.lock())
+    {
+        // the pool still exists so attempt to return it back to the pool
+        try
+        {
+            pool->add(uniqueQryptonightPtr{ptrToReleasedObject, ReturnToPoolDeleter(pool)});
+            return;
+        }
+        catch(const std::bad_alloc&) { }
+    }
+    // the pool is gone or cannot be added back so delete the object
+    delete ptrToReleasedObject;
 }
 
 void QryptonightPool::ReturnToPoolDeleter::detachFromPool()
 {
-	_ptrToOwnerPool.reset();
+    _ptrToOwnerPool.reset();
 }
 
 QryptonightPool::QryptonightPool(QryptonightFactory factory)
-	: _factory(factory)
-	, _mutex()
-	, _poolContainer()
+    : _factory(factory)
+    , _mutex()
+    , _poolContainer()
 {
 }
 
 QryptonightPool::~QryptonightPool()
 {
-	std::unique_lock<std::mutex> lock(_mutex);
-	while (!_poolContainer.empty())
-	{
-		_poolContainer.top().get_deleter().detachFromPool();
-		_poolContainer.pop();
-	}
+    std::unique_lock<std::mutex> lock(_mutex);
+    while (!_poolContainer.empty())
+    {
+        _poolContainer.top().get_deleter().detachFromPool();
+        _poolContainer.pop();
+    }
 }
 
 QryptonightPool::uniqueQryptonightPtr QryptonightPool::acquire()
 {
-	std::unique_lock<std::mutex> lock(_mutex);
-	if (_poolContainer.empty())
-	{
-		// no Qryptonight intances availabe in the pool so use the factory to
-		// create and return a new one
-		return uniqueQryptonightPtr{_factory(), ReturnToPoolDeleter(shared_from_this())};
-	}
-	else
-	{
-		// grab an unused Qryptonight instance from the pool
-		auto ptr = std::move(_poolContainer.top());
-		_poolContainer.pop();
-		return ptr;
-	}
+    std::unique_lock<std::mutex> lock(_mutex);
+    if (_poolContainer.empty())
+    {
+        // no Qryptonight intances availabe in the pool so use the factory to
+        // create and return a new one
+        return uniqueQryptonightPtr{_factory(), ReturnToPoolDeleter(shared_from_this())};
+    }
+    else
+    {
+        // grab an unused Qryptonight instance from the pool
+        auto ptr = std::move(_poolContainer.top());
+        _poolContainer.pop();
+        return ptr;
+    }
 }
 
 void QryptonightPool::add(QryptonightPool::uniqueQryptonightPtr ptr)
 {
-	std::unique_lock<std::mutex> lock(_mutex);
-	_poolContainer.push(std::move(ptr));
+    std::unique_lock<std::mutex> lock(_mutex);
+    _poolContainer.push(std::move(ptr));
 }
 
 bool QryptonightPool::empty() const
 {
-	std::unique_lock<std::mutex> lock(_mutex);
-	return _poolContainer.empty();
+    std::unique_lock<std::mutex> lock(_mutex);
+    return _poolContainer.empty();
 }
 
 size_t QryptonightPool::size() const
 {
-	std::unique_lock<std::mutex> lock(_mutex);
-	return _poolContainer.size();
+    std::unique_lock<std::mutex> lock(_mutex);
+    return _poolContainer.size();
 }

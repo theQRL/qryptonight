@@ -93,7 +93,7 @@ protected:
     std::deque<MinerSolutionEvent> _eventQueue;
     std::mutex _eventQueue_mutex;
     std::condition_variable _eventReleased;
-	
+
     static std::shared_ptr<QryptonightPool> _qnpool;
 };
 
