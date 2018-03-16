@@ -25,19 +25,45 @@
 #include "gtest/gtest.h"
 
 namespace {
+	
+	class QryptonightWithRefCount : public Qryptonight
+	{
+	public:
+		QryptonightWithRefCount() : Qryptonight() { ++_instances; }
+		virtual ~QryptonightWithRefCount() { --_instances; }
+		static size_t _instances;
+	};
+	
+	size_t QryptonightWithRefCount::_instances = 0;
+	
+	QryptonightPool::QryptonightFactory factory =
+		[](){ return new QryptonightWithRefCount(); };
+	
     TEST(QryptoNightPool, Init) {
-        auto pool = std::make_shared<QryptonightPool>();
+        auto pool = std::make_shared<QryptonightPool>(factory);
         EXPECT_TRUE(pool->empty());
         EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
-    TEST(QryptoNightPool, AcquireAndRunSingleHash) {
-        auto pool = std::make_shared<QryptonightPool>();
-        EXPECT_TRUE(pool->empty());
+    TEST(QryptoNightPool, Empty) {
+        auto pool = std::make_shared<QryptonightPool>(factory);
 
         auto qn = pool->acquire();
         EXPECT_TRUE(pool->empty());
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+		
+		qn.reset();
+        EXPECT_FALSE(pool->empty());
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+	}
+
+    TEST(QryptoNightPool, AcquireAndRunSingleHash) {
+        auto pool = std::make_shared<QryptonightPool>(factory);
+
+        auto qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
         EXPECT_TRUE(qn->isValid());
 
         std::vector<uint8_t> input {
@@ -56,19 +82,20 @@ namespace {
         EXPECT_EQ(output_expected, output);
 
 		qn.reset();
-        EXPECT_FALSE(pool->empty());
         EXPECT_EQ(pool->size(), 1);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 		
 		pool.reset();
+		
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
     TEST(QryptoNightPool, AcquireAndRunSingleHashTwice) {
-        auto pool = std::make_shared<QryptonightPool>();
-        EXPECT_TRUE(pool->empty());
+        auto pool = std::make_shared<QryptonightPool>(factory);
 
         auto qn = pool->acquire();
-        EXPECT_TRUE(pool->empty());
         EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
         EXPECT_TRUE(qn->isValid());
 
         std::vector<uint8_t> input {
@@ -87,12 +114,12 @@ namespace {
         EXPECT_EQ(output_expected, output);
 
 		qn.reset();
-        EXPECT_FALSE(pool->empty());
         EXPECT_EQ(pool->size(), 1);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
         qn = std::move(pool->acquire());
-        EXPECT_TRUE(pool->empty());
         EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
         EXPECT_TRUE(qn->isValid());
 
         output = qn->hash(input);
@@ -100,22 +127,24 @@ namespace {
         EXPECT_EQ(output_expected, output);
 
 		qn.reset();
-        EXPECT_FALSE(pool->empty());
         EXPECT_EQ(pool->size(), 1);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 		
 		pool.reset();
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
     TEST(QryptoNightPool, AcquireAndDeletePool) {
-        auto pool = std::make_shared<QryptonightPool>();
-        EXPECT_TRUE(pool->empty());
+        auto pool = std::make_shared<QryptonightPool>(factory);
 
         auto qn = pool->acquire();
-        EXPECT_TRUE(pool->empty());
         EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
         EXPECT_TRUE(qn->isValid());
 
 		pool.reset();
+
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
         std::vector<uint8_t> input {
                 0x03, 0x05, 0x07, 0x09
@@ -133,7 +162,8 @@ namespace {
         EXPECT_EQ(output_expected, output);
 
 		qn.reset();
+		
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
-
 
 }

@@ -28,13 +28,17 @@
 #include <mutex>
 #include <stack>
 #include <memory>
+#include <functional>
 
 // An RAII-style object pool for memory-intensive Qryptonight objects
 class QryptonightPool : public std::enable_shared_from_this<QryptonightPool>
 {
 public:
 
-    QryptonightPool();
+	// a factory function to create new Qryptonight objects
+	using QryptonightFactory = std::function<Qryptonight*()>;
+
+    QryptonightPool(QryptonightFactory factory = [](){ return new Qryptonight(); });
 
     virtual ~QryptonightPool();
 
@@ -56,7 +60,7 @@ public:
 	// obtain an unused Qryptonight instance from the pool or create
 	// a new one if there are none available
 	uniqueQryptonightPtr acquire();
-	
+
 	bool empty() const;
 	
 	size_t size() const;
@@ -66,6 +70,9 @@ protected:
 	// return the Qryptonight instance back to the pool
 	void add(uniqueQryptonightPtr ptr);
 	
+	// factory function to create the Qryptonight objects
+	QryptonightFactory _factory;
+
 	// allow mutually exclusive access to _pool
     mutable std::mutex _mutex;
 	
