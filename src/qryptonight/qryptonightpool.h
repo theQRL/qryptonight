@@ -31,6 +31,9 @@
 #include <functional>
 
 // An RAII-style object pool for memory-intensive Qryptonight objects
+// Warning! This class is not swig-compatible but does not need to be
+// exposed so make sure this class is not #included from a swig-included
+// header file
 class QryptonightPool : public std::enable_shared_from_this<QryptonightPool>
 {
 public:

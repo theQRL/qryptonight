@@ -24,12 +24,14 @@
 #ifndef QRYPTONIGHT_QRYPTOMINER_H
 #define QRYPTONIGHT_QRYPTOMINER_H
 
-#include "qryptonightpool.h"
 #include <atomic>
 #include <thread>
 #include <mutex>
 #include <future>
 #include <deque>
+#include <vector>
+
+class QryptonightPool; // forward-declare this class to keep swig from including
 
 struct MinerSolutionEvent
 {

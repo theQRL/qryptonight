@@ -27,7 +27,9 @@
 #include <vector>
 #include <cstdint>
 #include <deque>
-#include <qryptonight/qryptonightpool.h>
+#include <memory>
+
+class QryptonightPool; // forward-declare this class to keep swig from including
 
 class PoWHelper {
 public:
