@@ -42,7 +42,7 @@ public:
     std::vector<uint8_t> getDifficulty(uint64_t measurement,
                                        const std::vector<uint8_t> &parent_difficulty);
 
-    std::vector<uint8_t> getTarget(const std::vector<uint8_t> &difficulty);
+    static std::vector<uint8_t> getTarget(const std::vector<uint8_t> &difficulty);
 
     static bool passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target);
     static bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);

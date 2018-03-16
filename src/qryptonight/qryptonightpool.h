@@ -57,8 +57,8 @@ public:
 	// a std::unique_ptr with a custome deleter that the client will use
 	using uniqueQryptonightPtr = std::unique_ptr<Qryptonight, ReturnToPoolDeleter>;
 
-	// obtain an unused Qryptonight instance from the pool or create
-	// a new one if there are none available
+	// obtain an unused Qryptonight instance from the pool or
+	// create a new one if there are none available
 	uniqueQryptonightPtr acquire();
 
 	bool empty() const;
@@ -73,7 +73,7 @@ protected:
 	// factory function to create the Qryptonight objects
 	QryptonightFactory _factory;
 
-	// allow mutually exclusive access to _pool
+	// allow mutually exclusive access to _poolContainer
     mutable std::mutex _mutex;
 	
 	// container for the unused Qryptonight instances
