@@ -38,6 +38,26 @@ namespace {
 	
 	QryptonightPool::QryptonightFactory factory =
 		[](){ return new QryptonightWithRefCount(); };
+
+	void ValidateHash(QryptonightPool::uniqueQryptonightPtr& qn)
+	{
+        EXPECT_TRUE(qn->isValid());
+
+        std::vector<uint8_t> input {
+                0x03, 0x05, 0x07, 0x09
+        };
+
+        std::vector<uint8_t> output_expected {
+                0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
+                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
+                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
+                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
+        };
+
+        auto output = qn->hash(input);
+
+        EXPECT_EQ(output_expected, output);
+	}
 	
     TEST(QryptoNightPool, Init) {
         auto pool = std::make_shared<QryptonightPool>(factory);
@@ -58,77 +78,54 @@ namespace {
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 	}
 
-    TEST(QryptoNightPool, AcquireAndRunSingleHash) {
+    TEST(QryptoNightPool, AcquireHashReleaseCycle) {
         auto pool = std::make_shared<QryptonightPool>(factory);
 
         auto qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-        EXPECT_TRUE(qn->isValid());
 
-        std::vector<uint8_t> input {
-                0x03, 0x05, 0x07, 0x09
-        };
-
-        std::vector<uint8_t> output_expected {
-                0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
-                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
-                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
-                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
-        };
-
-        auto output = qn->hash(input);
-
-        EXPECT_EQ(output_expected, output);
+		ValidateHash(qn);
 
 		qn.reset();
         EXPECT_EQ(pool->size(), 1);
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+
+		qn = pool->acquire();
+        EXPECT_EQ(pool->size(), 0);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 		
+		ValidateHash(qn);
+
+		qn.reset();
+        EXPECT_EQ(pool->size(), 1);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+
 		pool.reset();
-		
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
     }
 
-    TEST(QryptoNightPool, AcquireAndRunSingleHashTwice) {
+    TEST(QryptoNightPool, AcquireHashReleaseFour) {
         auto pool = std::make_shared<QryptonightPool>(factory);
 
-        auto qn = pool->acquire();
+        auto qn1 = pool->acquire();
+        auto qn2 = pool->acquire();
+        auto qn3 = pool->acquire();
+        auto qn4 = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-        EXPECT_TRUE(qn->isValid());
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
 
-        std::vector<uint8_t> input {
-                0x03, 0x05, 0x07, 0x09
-        };
+		ValidateHash(qn1);
+		ValidateHash(qn2);
+		ValidateHash(qn3);
+		ValidateHash(qn4);
 
-        std::vector<uint8_t> output_expected {
-                0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
-                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
-                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
-                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
-        };
-
-        auto output = qn->hash(input);
-
-        EXPECT_EQ(output_expected, output);
-
-		qn.reset();
-        EXPECT_EQ(pool->size(), 1);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-
-        qn = std::move(pool->acquire());
-        EXPECT_EQ(pool->size(), 0);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-        EXPECT_TRUE(qn->isValid());
-
-        output = qn->hash(input);
-
-        EXPECT_EQ(output_expected, output);
-
-		qn.reset();
-        EXPECT_EQ(pool->size(), 1);
-		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
+		qn1.reset();
+		qn2.reset();
+		qn3.reset();
+		qn4.reset();
+        EXPECT_EQ(pool->size(), 4);
+		EXPECT_EQ(QryptonightWithRefCount::_instances, 4);
 		
 		pool.reset();
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 0);
@@ -140,26 +137,12 @@ namespace {
         auto qn = pool->acquire();
         EXPECT_EQ(pool->size(), 0);
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
-        EXPECT_TRUE(qn->isValid());
 
 		pool.reset();
 
 		EXPECT_EQ(QryptonightWithRefCount::_instances, 1);
 
-        std::vector<uint8_t> input {
-                0x03, 0x05, 0x07, 0x09
-        };
-
-        std::vector<uint8_t> output_expected {
-                0x3E, 0xE5, 0x3F, 0xE1, 0xAC, 0xF3, 0x55, 0x92,
-                0x66, 0xD8, 0x43, 0x89, 0xCE, 0xDE, 0x99, 0x33,
-                0xC6, 0x8F, 0xC5, 0x1E, 0xD0, 0xA6, 0xC7, 0x91,
-                0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
-        };
-
-        auto output = qn->hash(input);
-
-        EXPECT_EQ(output_expected, output);
+		ValidateHash(qn);
 
 		qn.reset();
 		
