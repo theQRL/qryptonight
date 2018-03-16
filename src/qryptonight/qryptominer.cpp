@@ -22,6 +22,8 @@
   */
 
 #include "qryptominer.h"
+#include "qryptonight.h"
+#include "qryptonightpool.h"
 #include "pow/powhelper.h"
 #include <iostream>
 #include <chrono>

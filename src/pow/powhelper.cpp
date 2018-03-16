@@ -23,6 +23,7 @@
 
 #include "powhelper.h"
 #include "qryptonight.h"
+#include "qryptonightpool.h"
 #include "misc/bignum.h"
 
 std::shared_ptr<QryptonightPool> PoWHelper::_qnpool = std::make_shared<QryptonightPool>();
