@@ -27,7 +27,12 @@
 #include "pow/powhelper.h"
 #include <iostream>
 #include <chrono>
+
+#ifndef _WIN32
 #include <netinet/in.h>
+#else
+#include <winsock.h>
+#endif
 
 #define HASHRATE_MEASUREMENT_CYCLE 100
 #define HASHRATE_MEASUREMENT_FACTOR 10
@@ -149,9 +154,9 @@ void Qryptominer::start(const std::vector<uint8_t> &input,
                                 {
                                     std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
 
-                                    MinerSolutionEvent event = {
-                                            .nonce = current_nonce,
-                                            .event_seq = _work_sequence_id.load()
+                                    MinerSolutionEvent event {
+                                            current_nonce, // nonce
+                                            _work_sequence_id.load() // event_seq
                                     };
 
                                     _eventQueue.push_back(event);

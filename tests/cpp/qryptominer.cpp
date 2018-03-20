@@ -74,7 +74,7 @@ namespace {
 
         qm.start(input, 0, boundary);
 
-        sleep(3);
+        std::this_thread::sleep_for(std::chrono::seconds(3));
 
         ASSERT_TRUE(qm.solutionAvailable());
 
@@ -115,7 +115,7 @@ namespace {
 
         qm.start(input, 0, boundary);
         qm.start(input, 0, boundary);
-        sleep(3);
+        std::this_thread::sleep_for(std::chrono::seconds(3));
 
         ASSERT_TRUE(qm.solutionAvailable());
         EXPECT_EQ(4, qm.solutionNonce());
@@ -142,7 +142,7 @@ namespace {
         };
 
         qm.start(input, 0, target, 4);
-        sleep(3);
+        std::this_thread::sleep_for(std::chrono::seconds(3));
         std::cout << std::endl << "hashes/sec: " << qm.hashRate() << std::endl;
 
         EXPECT_FALSE(qm.solutionAvailable());
@@ -165,7 +165,7 @@ namespace {
         };
 
         qm.start(input, 0, boundary);
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         qm.cancel();
         ASSERT_FALSE(qm.isRunning());
 
