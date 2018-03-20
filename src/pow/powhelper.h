@@ -27,7 +27,9 @@
 #include <vector>
 #include <cstdint>
 #include <deque>
-#include <qryptonight/qryptonight.h>
+#include <memory>
+
+class QryptonightPool; // forward-declare this class to keep swig from including
 
 class PoWHelper {
 public:
@@ -54,7 +56,7 @@ private:
     int64_t _adjfact_upper;
     int64_t _adj_quantization;
 
-    Qryptonight _qn;
+    static std::shared_ptr<QryptonightPool> _qnpool;
 };
 
 #endif //QRYPTONIGHT_POW_Impl_H

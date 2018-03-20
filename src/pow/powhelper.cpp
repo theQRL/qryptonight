@@ -23,7 +23,10 @@
 
 #include "powhelper.h"
 #include "qryptonight.h"
+#include "qryptonightpool.h"
 #include "misc/bignum.h"
+
+std::shared_ptr<QryptonightPool> PoWHelper::_qnpool = std::make_shared<QryptonightPool>();
 
 PoWHelper::PoWHelper(int64_t kp,
                      uint64_t set_point,
@@ -111,7 +114,7 @@ bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector
 
 bool PoWHelper::verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target)
 {
-    Qryptonight qn;
-    auto hash = qn.hash(input);
+    auto qn = _qnpool->acquire();
+    auto hash = qn->hash(input);
     return passesTarget(hash, target);
 }

@@ -24,12 +24,14 @@
 #ifndef QRYPTONIGHT_QRYPTOMINER_H
 #define QRYPTONIGHT_QRYPTOMINER_H
 
-#include "qryptonight.h"
 #include <atomic>
 #include <thread>
 #include <mutex>
 #include <future>
 #include <deque>
+#include <vector>
+
+class QryptonightPool; // forward-declare this class to keep swig from including
 
 struct MinerSolutionEvent
 {
@@ -93,6 +95,8 @@ protected:
     std::deque<MinerSolutionEvent> _eventQueue;
     std::mutex _eventQueue_mutex;
     std::condition_variable _eventReleased;
+
+    static std::shared_ptr<QryptonightPool> _qnpool;
 };
 
 #endif //QRYPTONIGHT_QRYPTOMINER_H
