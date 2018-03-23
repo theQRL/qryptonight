@@ -60,7 +60,7 @@ def setup_package():
     cmake = []
     pkg_data = { 'pyqryptonight':['*.dll'] } if sys.platform == 'win32' else {}
 
-    setup(setup_requires=['six', 'pyscaffold>=2.5a0,<2.6a0'] + sphinx + cmake,
+    setup(setup_requires=['six', 'pyscaffold'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
           cmdclass=dict(build_ext=CMakeBuild),
