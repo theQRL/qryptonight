@@ -21,8 +21,7 @@ class CMakeBuild(build_ext):
         env['CXXFLAGS'] += ' -DVERSION_INFO=\\"' + self.distribution.get_version() + '\\"'
 
         for ext in self.extensions:
-            extension_path = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))).replace('\\','/')
-
+            extension_path = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))).replace('\\', '/')
 
             cmake_call = ['cmake', ext.sourcedir,
                           '-DBUILD_PYTHON=ON',
@@ -58,9 +57,9 @@ def setup_package():
     sphinx = ['sphinx'] if needs_sphinx else []
 
     cmake = []
-    pkg_data = { 'pyqryptonight':['*.dll'] } if sys.platform == 'win32' else {}
+    pkg_data = {'pyqryptonight': ['*.dll']} if sys.platform == 'win32' else {}
 
-    setup(setup_requires=['six', 'pyscaffold'] + sphinx + cmake,
+    setup(setup_requires=['six', 'pyscaffold>3.0.2'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
           cmdclass=dict(build_ext=CMakeBuild),
