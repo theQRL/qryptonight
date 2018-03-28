@@ -37,7 +37,7 @@ namespace {
             0xF8, 0xF9, 0xE8, 0x9D, 0xB6, 0x23, 0xF0, 0xF6
         };
 
-        ASSERT_FALSE(PoWHelper::passesTarget(target, target));
+        ASSERT_TRUE(PoWHelper::passesTarget(target, target));
 
         std::cout << std::endl;
         std::cout << printByteVector2(target) << std::endl;
