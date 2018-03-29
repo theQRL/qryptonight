@@ -24,11 +24,13 @@
 #include <xmrstak/backend/cpu/crypto/cryptonight.h>
 #include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
 #include <iostream>
+#include <xmrstak/jconf.hpp>
 #include "qryptonight.h"
 
 Qryptonight::Qryptonight()
 {
     size_t init_res;
+    jconf::inst()->parse_config("", "");
 
     // First try fast mem
     init_res = cryptonight_init(1, 1, &_last_msg);
@@ -54,13 +56,18 @@ Qryptonight::~Qryptonight()
     }
 }
 
-std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input)
+std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input) throw(std::invalid_argument)
 {
     std::vector<uint8_t> output(32);
 
-    cryptonight_hash<MONERO_MASK, MONERO_ITER, MONERO_MEMORY, false, false>(input.data(), input.size(),
-                                                                            output.data(),
-                                                                            _context);
+    if (input.size()<43)
+    {
+        throw std::invalid_argument("input length should be > 42 bytes");
+    }
+
+    cryptonight_hash<cryptonight_monero, false, false>(input.data(), input.size(),
+                                                       output.data(),
+                                                       _context);
 
     return output;
 };

@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
 
 class Qryptonight {
@@ -36,7 +37,7 @@ public:
     bool isValid() { return _context != nullptr; }
     std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
 
-    std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
+    std::vector<uint8_t> hash(const std::vector<uint8_t>& input) throw(std::invalid_argument);
 
 protected:
     alloc_msg _last_msg = { nullptr };
