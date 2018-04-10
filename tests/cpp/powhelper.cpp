@@ -147,10 +147,10 @@ namespace {
         EXPECT_EQ(1048828, fromByteVector(answer));
 
         answer = ph.getDifficulty(40, toByteVector(1000000) );
-        EXPECT_EQ(1032226, fromByteVector(answer));
+        EXPECT_EQ(1033203, fromByteVector(answer));
 
         answer = ph.getDifficulty(55, toByteVector(1000000) );
-        EXPECT_EQ(1007812, fromByteVector(answer));
+        EXPECT_EQ(1008789, fromByteVector(answer));
 
         answer = ph.getDifficulty(60, toByteVector(1000000) );
         EXPECT_EQ(1000000, fromByteVector(answer));
@@ -184,7 +184,7 @@ namespace {
         EXPECT_EQ(4, fromByteVector(answer));
 
         answer = ph.getDifficulty(10, toByteVector(500) );
-        EXPECT_EQ(540, fromByteVector(answer));
+        EXPECT_EQ(541, fromByteVector(answer));
 
         answer = ph.getDifficulty(70, toByteVector(5) );
         EXPECT_EQ(4, fromByteVector(answer));
@@ -201,10 +201,10 @@ namespace {
         EXPECT_EQ(1048828, fromByteVector(difficulty));
 
         difficulty = ph.getDifficulty(40, toByteVector(1000000) );
-        EXPECT_EQ(1032226, fromByteVector(difficulty));
+        EXPECT_EQ(1033203, fromByteVector(difficulty));
 
         difficulty = ph.getDifficulty(55, toByteVector(1000000) );
-        EXPECT_EQ(1007812, fromByteVector(difficulty));
+        EXPECT_EQ(1008789, fromByteVector(difficulty));
 
         difficulty = ph.getDifficulty(60, toByteVector(1000000) );
         EXPECT_EQ(1000000, fromByteVector(difficulty));
