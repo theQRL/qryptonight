@@ -48,11 +48,8 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
 
     // calculate adjustment factor and apply boundaries
-    long double tmp_val = ((long double) _Kp) - _Kp*measurement/_set_point;
-    if (std::isnan(tmp_val))
-    {
-        throw std::invalid_argument("difficulty adjustment results in NaN.");
-    };
+
+    const auto tmp_val = static_cast<const long>(((double) _Kp) - (double)_Kp*(double)measurement/(double)_set_point);
 
     bigint adjustment = bigint(tmp_val);
 
