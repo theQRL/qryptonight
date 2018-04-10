@@ -31,12 +31,12 @@ std::string printByteVector(const std::vector<uint8_t> &vec)
 {
     std::stringstream ss;
 
-    for(uint8_t i=0; i<32; i++)
+    for(int i=0; i<vec.size(); i++)
     {
         if (i>0 && i%8==0)
             ss << std::endl;
         ss << "0x" << std::setfill('0') << std::setw(2) << std::hex << (int)(vec[i]);
-        if (i<31)
+        if (i<vec.size()-1)
             ss << ", ";
     }
 
@@ -47,7 +47,7 @@ std::string printByteVector2(const std::vector<uint8_t> &vec)
 {
     std::stringstream ss;
 
-    for(uint8_t i=0; i<32; i++)
+    for(int i=0; i<vec.size(); i++)
     {
         ss << std::setfill('0') << std::setw(2) << std::hex << (int)(vec[i]);
     }

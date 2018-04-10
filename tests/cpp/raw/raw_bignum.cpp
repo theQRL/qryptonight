@@ -22,6 +22,7 @@
   */
 #include <iostream>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cmath>
 #include "gtest/gtest.h"
 
 namespace {
@@ -61,6 +62,23 @@ namespace {
         uint256_t c = a / b;
 
         EXPECT_EQ( uint256_t("33333333333333333333333333333333333333333333333333"), c);
+    }
+
+    TEST(Boost_bignum, NaNAssert1) {
+        double nan_value = std::nan("0");
+        EXPECT_DEATH( {uint256_t a { nan_value };} , "boost::math::isnan");
+    }
+
+    TEST(Boost_bignum, NaNAssert2) {
+        EXPECT_DEATH( {uint256_t a { 0./0.  };} , "boost::math::isnan");
+    }
+
+    TEST(Boost_bignum, NaNAssert3) {
+        EXPECT_DEATH( {uint256_t a { 1./0 };} , "boost::math::isinf");
+    }
+
+    TEST(Boost_bignum, InvalidNumber) {
+        EXPECT_THROW( {uint256_t a { "hello" };} , std::exception);
     }
 
     // FIXME: This is not supported below Boost 1.60 (xenial will not work)

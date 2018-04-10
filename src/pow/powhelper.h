@@ -41,8 +41,10 @@ public:
 
     virtual ~PoWHelper()=default;
 
+    int64_t getKp() { return _Kp; }
+
     std::vector<uint8_t> getDifficulty(uint64_t measurement,
-                                       const std::vector<uint8_t> &parent_difficulty);
+                                       const std::vector<uint8_t> &parent_difficulty) throw(std::invalid_argument);
 
     std::vector<uint8_t> getTarget(const std::vector<uint8_t> &difficulty);
 
@@ -50,7 +52,7 @@ public:
     bool verifyInput(const std::vector<uint8_t> &input, const std::vector<uint8_t> &target);
 
 private:
-    long double _Kp;
+    int64_t _Kp;
     uint64_t _set_point;
     int64_t _adjfact_lower;
     int64_t _adjfact_upper;

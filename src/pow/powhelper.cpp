@@ -42,15 +42,16 @@ PoWHelper::PoWHelper(int64_t kp,
 }
 
 std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
-                                              const std::vector<uint8_t> &parent_difficulty_vec)
+                                              const std::vector<uint8_t> &parent_difficulty_vec) throw(std::invalid_argument)
 {
     const uint256_t _difficulty_lower_bound = 2;                                // To avoid issues with the target
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
 
-    auto parent_difficulty = fromByteVector(parent_difficulty_vec);
-
     // calculate adjustment factor and apply boundaries
-    bigint adjustment = bigint(_Kp - _Kp*measurement/_set_point);
+
+    const auto tmp_val = static_cast<const long>(((double) _Kp) - (double)_Kp*(double)measurement/(double)_set_point);
+
+    bigint adjustment = bigint(tmp_val);
 
     if (adjustment > _adjfact_upper)
     {
@@ -61,6 +62,7 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
         adjustment = bigint(_adjfact_lower);
     }
 
+    uint256_t parent_difficulty = fromByteVector(parent_difficulty_vec);
     bigint difficulty_delta = (parent_difficulty * adjustment) / _adj_quantization;
 
     if (difficulty_delta == 0 &&  adjustment != 0){
@@ -69,7 +71,6 @@ std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
 
     // calculate difficulty and apply boundaries
     bigint difficulty = parent_difficulty + difficulty_delta;
-
 
     difficulty = std::max<bigint>(difficulty, _difficulty_lower_bound);
     difficulty = std::min<bigint>(difficulty, _difficulty_upper_bound);
@@ -96,6 +97,16 @@ std::vector<uint8_t> PoWHelper::getTarget(const std::vector<uint8_t> &difficulty
 
 bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
 {
+    if (hash.size()!=32)
+    {
+        return false;
+    }
+
+    if (hash.size()!=target.size())
+    {
+        return false;
+    }
+
     // The hash needs to be below or equals to the target (both 32 bytes)
     // Monero uses little endian.. we need to check in reverse order
     for(size_t i = 0; i < 32; i++)
