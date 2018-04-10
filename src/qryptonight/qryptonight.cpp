@@ -30,7 +30,7 @@
 Qryptonight::Qryptonight()
 {
     size_t init_res;
-    jconf::inst()->parse_config("", "");
+    init();
 
     // First try fast mem
     init_res = cryptonight_init(1, 1, &_last_msg);
@@ -46,6 +46,17 @@ Qryptonight::Qryptonight()
     // If something failed.. go for basic settings
     init_res = cryptonight_init(0, 1, &_last_msg);
     _context = cryptonight_alloc_ctx(0, 1, &_last_msg);
+}
+
+std::atomic_bool Qryptonight::_jconf_initialized { false };
+
+void Qryptonight::init()
+{
+    if (!_jconf_initialized)
+    {
+        _jconf_initialized = true;
+        jconf::inst()->parse_config("", "");
+    }
 }
 
 Qryptonight::~Qryptonight()

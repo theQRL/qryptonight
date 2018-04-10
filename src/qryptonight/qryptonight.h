@@ -28,6 +28,7 @@
 #include <string>
 #include <stdexcept>
 #include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
+#include <atomic>
 
 class Qryptonight {
 public:
@@ -40,6 +41,9 @@ public:
     std::vector<uint8_t> hash(const std::vector<uint8_t>& input) throw(std::invalid_argument);
 
 protected:
+    static void init();
+    static std::atomic_bool _jconf_initialized;
+
     alloc_msg _last_msg = { nullptr };
     cryptonight_ctx *_context;
 };
