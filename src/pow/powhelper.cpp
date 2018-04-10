@@ -100,6 +100,16 @@ std::vector<uint8_t> PoWHelper::getTarget(const std::vector<uint8_t> &difficulty
 
 bool PoWHelper::passesTarget(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &target)
 {
+    if (hash.size()!=32)
+    {
+        return false;
+    }
+
+    if (hash.size()!=target.size())
+    {
+        return false;
+    }
+
     // The hash needs to be below or equals to the target (both 32 bytes)
     // Monero uses little endian.. we need to check in reverse order
     for(size_t i = 0; i < 32; i++)
