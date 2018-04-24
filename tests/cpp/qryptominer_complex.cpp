@@ -30,12 +30,15 @@ namespace {
     class CustomMiner: public Qryptominer
     {
     public:
-        void solutionEvent(uint32_t nonce) override
+        void handleEvent(MinerEvent event) override
         {
-            using namespace std::chrono_literals;
-            std::cout << "custom nonce: " << nonce << std::endl;
-            std::this_thread::sleep_for(500ms);
-            cancel();
+            if (event.type == SOLUTION)
+            {
+                using namespace std::chrono_literals;
+                std::cout << "custom nonce: " << event.nonce << std::endl;
+                std::this_thread::sleep_for(500ms);
+                cancel();
+            }
         }
     };
 

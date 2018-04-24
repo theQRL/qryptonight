@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: qrledger/qrl-docker:xenial
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: cmake -DBUILD_PYTHON=ON -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5
+      - run: make
+      - run: export GTEST_COLOR=1 && ctest -VV
+
+  test_python:
+    docker:
+      - image: qrledger/qrl-docker:xenial
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: python3 setup.py test
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build
+      - test_python
