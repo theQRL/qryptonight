@@ -24,7 +24,7 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: python3 setup.py build sdist bdist_wheel
+      - run: python3 setup.py build sdist
       - run: pip install twine
       - run: twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*
 
@@ -32,18 +32,22 @@ workflows:
   version: 2
   build_all:
     jobs:
-      - build
-      - test_python
-      - deploy-pypi-check:
-          type: approval
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+      - test_python:
+          filters:
+            tags:
+              only: /.*/
+
+      - deploy-pypi:
           requires:
             - build
             - test_python
           filters:
-            tags:
-              only: /^v[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
-      - deploy-pypi:
-          requires:
-            - deploy-pypi-check
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*/
