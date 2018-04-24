@@ -57,3 +57,5 @@ coverage\.xml
 \.DS_Store
 
 modeling/\.ipynb_checkpoints/
+
+dist/
