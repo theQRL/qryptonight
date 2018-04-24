@@ -33,10 +33,15 @@
 
 class QryptonightPool; // forward-declare this class to keep swig from including
 
-struct MinerSolutionEvent
-{
-    uint32_t nonce;
-    uint64_t event_seq;
+enum MinerEventType {
+  SOLUTION = 0,
+  TIMEOUT = 1
+};
+
+struct MinerEvent {
+  MinerEventType type;
+  uint64_t seq;
+  uint32_t nonce;
 };
 
 class Qryptominer {
@@ -44,16 +49,20 @@ public:
     Qryptominer();
     virtual ~Qryptominer();
 
-    void start(const std::vector<uint8_t> &input,
-               size_t nonceOffset,
-               const std::vector<uint8_t> &target,
-               uint32_t thread_count = 1);
+    void start(const std::vector<uint8_t>& input,
+            size_t nonceOffset,
+            const std::vector<uint8_t>& target,
+            uint32_t thread_count = 1);
+
+    void setTimer(uint32_t stopInMilliseconds);
+    void disableTimer();
+    uint32_t getSecondsRemaining();
 
     void cancel();
     bool isRunning();
     std::uint32_t runningThreadCount();
 
-    virtual void solutionEvent(uint32_t nonce);
+    virtual void handleEvent(MinerEvent event) { };
 
     bool solutionAvailable();
     std::vector<uint8_t> solutionInput();
@@ -62,39 +71,45 @@ public:
     uint32_t hashRate();
 
 protected:
-    void _solutionEvent(uint32_t value, uint64_t event_seq);
+    void _sendEvent(MinerEvent event);
+    void _queueEvent(MinerEvent event);
+
     void _eventThreadWorker();
-    void _miningThreadWorker();
 
     std::vector<uint8_t> _input;
     std::vector<uint8_t> _target;
-    size_t _nonceOffset { 0 };
+    size_t _nonceOffset{0};
 
-    std::atomic<std::uint64_t> _work_sequence_id { 0 };
+    std::atomic<std::uint64_t> _work_sequence_id{0};
 
     std::vector<uint8_t> _solution_input;
     std::vector<uint8_t> _solution_hash;
 
-    std::atomic_bool _solution_found { false };
-    std::atomic_bool _stop_eventThread { false };
-    std::atomic_bool _stop_request { false };
+    std::atomic_bool _solution_found{false};
+    std::atomic_bool _stop_eventThread{false};
+    std::atomic_bool _stop_request{false};
 
-    std::atomic<std::uint32_t> _hash_count { 0 };
-    std::atomic<std::uint32_t> _hash_per_sec { 0 };
+    std::atomic<std::uint32_t> _hash_count{0};
+    std::atomic<std::uint32_t> _hash_per_sec{0};
+
+    std::atomic<std::int32_t> _deadline_milliseconds;
+    std::atomic<bool> _deadline_enabled;
 
     std::vector<std::unique_ptr<std::thread>> _runningThreads;
-    std::atomic<std::uint32_t> _runningThreads_count { 0 };
+    std::atomic<std::uint32_t> _runningThreads_count{0};
 
     std::recursive_timed_mutex _solution_mutex;
-    std::recursive_timed_mutex _solution_event_mutex;
+    std::recursive_timed_mutex _event_mutex;
     std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;
     std::unique_ptr<std::thread> _eventThread;
 
-    std::deque<MinerSolutionEvent> _eventQueue;
+    std::deque<MinerEvent> _eventQueue;
     std::mutex _eventQueue_mutex;
     std::condition_variable _eventReleased;
+
+    std::chrono::high_resolution_clock::time_point _referenceTime;
 
     static std::shared_ptr<QryptonightPool> _qnpool;
 };
