@@ -46,3 +46,9 @@ class TestStr2BigNum(TestCase):
         expected_value = "55217455456816260776929245529948378455782781241038999928326084774751073468416"
 
         self.assertEqual(expected_value, value)
+
+    def test_numberEmpty(self):
+        with self.assertRaises(TypeError):
+            UInt256ToString(None)
+        with self.assertRaises(ValueError):
+            UInt256ToString(b'')

@@ -166,7 +166,7 @@ TEST(Qryptominer, Run1Thread_bigblob) {
   qm.start(input, 0, boundary);
 
   std::cout << "miner started" << std::endl;
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 
   ASSERT_TRUE(qm.solutionAvailable());
   EXPECT_EQ(50, qm.solutionNonce());
