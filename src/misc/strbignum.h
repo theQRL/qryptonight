@@ -6,8 +6,9 @@
 
 #include <vector>
 #include <cstdint>
+#include <exception>
 
-std::string UInt256ToString(std::vector<uint8_t> vec);
+std::string UInt256ToString(std::vector<uint8_t> vec) throw(std::invalid_argument);
 std::vector<uint8_t> StringToUInt256(const std::string &s);
 
 #endif //QRYPTONIGHT_STRBIGNUM_H

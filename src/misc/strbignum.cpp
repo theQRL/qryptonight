@@ -5,6 +5,11 @@
 
 std::string UInt256ToString(std::vector<uint8_t> vec)
 {
+    if (vec.size()!=32)
+    {
+        throw std::invalid_argument("vector size should be 32");
+    }
+
     uint256_t val = fromByteVector(vec);
     return val.str();
 }
