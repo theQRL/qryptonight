@@ -75,6 +75,20 @@ bool Qryptominer::solutionAvailable()
     return _solution_found;
 }
 
+bool Qryptominer::waitForAnswer(uint32_t timeoutSeconds)
+{
+    for (int i=0; i<timeoutSeconds; i++)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (solutionAvailable())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 std::vector<uint8_t> Qryptominer::solutionInput()
 {
     std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
@@ -215,7 +229,8 @@ void Qryptominer::_queueEvent(MinerEvent event)
 
 void Qryptominer::cancel()
 {
-    std::lock_guard<std::recursive_timed_mutex> lock(_runningThreads_mutex);
+    std::lock_guard<std::recursive_timed_mutex> lock1(_event_mutex);
+    std::lock_guard<std::recursive_timed_mutex> lock2(_runningThreads_mutex);
     _stop_request = true;
 
     for (auto& t : _runningThreads) {
