@@ -90,4 +90,7 @@ namespace {
         EXPECT_EQ(expected, int256);
     }
 
+    TEST(Bignum, bignum_str_invalid) {
+        EXPECT_THROW(auto int256 = StringToUInt256("invalid"), std::invalid_argument);
+    }
 }
