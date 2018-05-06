@@ -14,7 +14,7 @@ set(BUILD_TESTS ON CACHE BOOL "Enables tests")
 set(BUILD_PYTHON ON CACHE BOOL "Enables python wrapper")
 set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
-set(SANITIZE_ADDRESS ON  CACHE BOOL "Enables address sanitizer")
+set(SANITIZE_ADDRESS OFF  CACHE BOOL "Enables address sanitizer")
 set(SANITIZE_THREAD  OFF CACHE BOOL "Enables thread sanitizer")
 
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
