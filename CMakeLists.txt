@@ -11,13 +11,13 @@ set(CMAKE_ERROR_DEPRECATED FALSE)
 set(CMAKE_WARN_DEPRECATED FALSE)
 
 set(BUILD_TESTS ON CACHE BOOL "Enables tests")
-set(BUILD_GO OFF CACHE BOOL "Enables go wrapper")
 set(BUILD_PYTHON ON CACHE BOOL "Enables python wrapper")
-set(BUILD_PYTHON_LOCALDEPLOY OFF CACHE BOOL "Deploys python locally")
 set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
+set(SANITIZE_ADDRESS OFF  CACHE BOOL "Enables address sanitizer")
+set(SANITIZE_THREAD  OFF CACHE BOOL "Enables thread sanitizer")
+
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
-message(STATUS "GOLANG WRAPPER " ${BUILD_GO})
 message(STATUS "PYTHON WRAPPER " ${BUILD_PYTHON})
 message(STATUS "WEBASSEMBLY    " ${BUILD_WEBASSEMBLY})
 
@@ -27,11 +27,23 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 endif()
 
-if (BUILD_PYTHON OR BUILD_GO)
+if (BUILD_PYTHON)
     find_package(SWIG REQUIRED)
     INCLUDE(${SWIG_USE_FILE})
     unset(SWIG_LANG_TYPE)
 endif ()
+
+if (SANITIZE_ADDRESS)
+    message(STATUS Sanitizer: Address)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+    set (CMAKE_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=address")
+endif()
+
+if (SANITIZE_THREAD)
+    message(STATUS Sanitizer: Thread)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+    set (CMAKE_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=thread")
+endif()
 
 FIND_PACKAGE(Boost 1.58 REQUIRED)
 

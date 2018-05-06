@@ -58,6 +58,8 @@ public:
     void disableTimer();
     uint32_t getSecondsRemaining();
 
+    bool waitForAnswer(uint32_t timeoutSeconds);
+
     void cancel();
     bool isRunning();
     std::uint32_t runningThreadCount();
