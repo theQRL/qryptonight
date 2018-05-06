@@ -52,3 +52,7 @@ class TestStr2BigNum(TestCase):
             UInt256ToString(None)
         with self.assertRaises(ValueError):
             UInt256ToString(b'')
+
+    def test_numberInvalidString(self):
+        with self.assertRaises(ValueError):
+            StringToUInt256("invalid")

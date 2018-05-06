@@ -16,6 +16,12 @@ std::string UInt256ToString(std::vector<uint8_t> vec)
 
 std::vector<uint8_t> StringToUInt256(const std::string &s)
 {
-    uint256_t val(s);
-    return toByteVector(val);
+    try {
+        uint256_t val(s);
+        return toByteVector(val);
+    }
+    catch(...)
+    {
+        throw std::invalid_argument("conversion was not possible");
+    }
 }
