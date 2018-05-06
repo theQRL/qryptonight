@@ -6,7 +6,17 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: cmake -DBUILD_PYTHON=ON -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5
+      - run: cmake -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5
+      - run: make
+      - run: export GTEST_COLOR=1 && ctest -VV
+
+  sanitize_thread:
+    docker:
+      - image: qrledger/qrl-docker:xenial
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: cmake -DSANITIZE_ADDRESS=OFF -DSANITIZE_THREAD=ON -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5
       - run: make
       - run: export GTEST_COLOR=1 && ctest -VV
 
@@ -37,6 +47,11 @@ workflows:
             tags:
               only: /.*/
 
+      - sanitize_thread:
+          filters:
+            tags:
+              only: /.*/
+
       - test_python:
           filters:
             tags:
@@ -45,6 +60,7 @@ workflows:
       - deploy-pypi:
           requires:
             - build
+            - sanitize_thread
             - test_python
           filters:
             branches:
