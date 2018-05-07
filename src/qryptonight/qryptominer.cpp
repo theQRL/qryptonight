@@ -108,7 +108,7 @@ uint32_t Qryptominer::solutionNonce()
 
 std::vector<uint8_t> Qryptominer::solutionHash()
 {
-    std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+    std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
     return _solution_hash;
 }
 
