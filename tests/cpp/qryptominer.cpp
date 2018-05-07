@@ -198,7 +198,7 @@ TEST(Qryptominer, RunAndRestart)
     };
 
     qm.start(input, 0, boundary);
-    qm.waitForAnswer(15);
+    qm.waitForAnswer(20);
 
     ASSERT_TRUE(qm.solutionAvailable());
     EXPECT_EQ(37, qm.solutionNonce());
