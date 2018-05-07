@@ -64,8 +64,11 @@ Qryptominer::Qryptominer()
 Qryptominer::~Qryptominer()
 {
     cancel();
-    _stop_eventThread = true;
-    _eventReleased.notify_one();
+    {
+        std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+        _stop_eventThread = true;
+        _eventReleased.notify_one();
+    }
     _eventThread->join();
 }
 
@@ -105,7 +108,7 @@ uint32_t Qryptominer::solutionNonce()
 
 std::vector<uint8_t> Qryptominer::solutionHash()
 {
-    std::lock_guard<std::recursive_timed_mutex> lock(_solution_mutex);
+    std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
     return _solution_hash;
 }
 
