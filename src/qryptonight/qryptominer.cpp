@@ -59,6 +59,7 @@ Qryptominer::Qryptominer()
     _eventThread = std::make_unique<std::thread>([&]() { _eventThreadWorker(); });
     _referenceTime = std::chrono::high_resolution_clock::now();
     _deadline_enabled = false;
+    _pause_milliseconds = 0;
 }
 
 Qryptominer::~Qryptominer()
@@ -141,6 +142,11 @@ uint32_t Qryptominer::getSecondsRemaining()
     return (uint32_t) remaining;
 }
 
+void Qryptominer::setForcedSleep(uint32_t pauseInMilliseconds)
+{
+    _pause_milliseconds = pauseInMilliseconds;
+}
+
 void Qryptominer::start(const std::vector<uint8_t>& input,
         size_t nonceOffset,
         const std::vector<uint8_t>& target,
@@ -201,6 +207,11 @@ void Qryptominer::start(const std::vector<uint8_t>& input,
                               _stop_request = true;
                               break;
                           }
+                      }
+
+                      if (_pause_milliseconds>0)
+                      {
+                          std::this_thread::sleep_for(std::chrono::milliseconds(_pause_milliseconds));
                       }
 
                       if (PoWHelper::passesTarget(current_hash, _target)) {

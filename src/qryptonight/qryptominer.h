@@ -58,6 +58,8 @@ public:
     void disableTimer();
     uint32_t getSecondsRemaining();
 
+    void setForcedSleep(uint32_t pauseInMilliseconds);
+
     bool waitForAnswer(uint32_t timeoutSeconds);
 
     void cancel();
@@ -96,6 +98,8 @@ protected:
 
     std::atomic<std::int32_t> _deadline_milliseconds;
     std::atomic<bool> _deadline_enabled;
+
+    std::atomic<std::int32_t> _pause_milliseconds;
 
     std::vector<std::unique_ptr<std::thread>> _runningThreads;
     std::atomic<std::uint32_t> _runningThreads_count{0};
