@@ -30,6 +30,16 @@ jobs:
       - run: make
       - run: export GTEST_COLOR=1 && ctest -VV
 
+  sanitize_undefined:
+    docker:
+      - image: qrledger/qrl-docker:bionic
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: cmake -DSANITIZE_UNDEFINED=ON
+      - run: make
+      - run: export GTEST_COLOR=1 && ctest -VV
+
   test_python:
     docker:
       - image: qrledger/qrl-docker:xenial
