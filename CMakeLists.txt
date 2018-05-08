@@ -16,6 +16,7 @@ set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
 set(SANITIZE_ADDRESS OFF  CACHE BOOL "Enables address sanitizer")
 set(SANITIZE_THREAD  OFF CACHE BOOL "Enables thread sanitizer")
+set(SANITIZE_UNDEFINED  OFF CACHE BOOL "Enables undefined sanitizer")
 
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
 message(STATUS "PYTHON WRAPPER " ${BUILD_PYTHON})
@@ -43,6 +44,12 @@ if (SANITIZE_THREAD)
     message(STATUS Sanitizer: Thread)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
     set (CMAKE_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=thread")
+endif()
+
+if (SANITIZE_UNDEFINED)
+    message(STATUS Sanitizer: Undefined)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
+    set (CMAKE_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=undefined")
 endif()
 
 FIND_PACKAGE(Boost 1.58 REQUIRED)
