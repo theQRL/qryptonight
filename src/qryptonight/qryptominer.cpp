@@ -64,8 +64,11 @@ Qryptominer::Qryptominer()
 Qryptominer::~Qryptominer()
 {
     cancel();
-    _stop_eventThread = true;
-    _eventReleased.notify_one();
+    {
+        std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+        _stop_eventThread = true;
+        _eventReleased.notify_one();
+    }
     _eventThread->join();
 }
 
