@@ -71,7 +71,10 @@ std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input) throw(
 {
     std::vector<uint8_t> output(32);
 
-    if (input.size()<43)
+    // cryptonight hash does not support less than 43 bytes
+    const uint8_t minimum_input_size = 43;
+
+    if (input.size()<minimum_input_size)
     {
         throw std::invalid_argument("input length should be > 42 bytes");
     }
