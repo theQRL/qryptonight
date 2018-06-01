@@ -44,7 +44,7 @@ public:
     int64_t getKp() { return _Kp; }
 
     std::vector<uint8_t> getDifficulty(uint64_t measurement,
-                                       const std::vector<uint8_t> &parent_difficulty) throw(std::invalid_argument);
+                                       const std::vector<uint8_t> &parent_difficulty);
 
     std::vector<uint8_t> getTarget(const std::vector<uint8_t> &difficulty);
 

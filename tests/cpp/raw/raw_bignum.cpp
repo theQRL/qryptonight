@@ -73,9 +73,12 @@ namespace {
         EXPECT_DEATH( {uint256_t a { 0./0.  };} , "boost::math::isnan");
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiv-by-zero"
     TEST(Boost_bignum, NaNAssert3) {
         EXPECT_DEATH( {uint256_t a { 1./0 };} , "boost::math::isinf");
     }
+#pragma GCC diagnostic pop
 
     TEST(Boost_bignum, InvalidNumber) {
         EXPECT_THROW( {uint256_t a { "hello" };} , std::exception);
