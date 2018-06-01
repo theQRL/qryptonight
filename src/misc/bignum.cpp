@@ -3,7 +3,7 @@
 
 #include "bignum.h"
 
-uint256_t fromByteVector(const std::vector<uint8_t> &vec) throw(std::invalid_argument)
+uint256_t fromByteVector(const std::vector<uint8_t> &vec)
 {
     if (vec.size()!=32)
     {

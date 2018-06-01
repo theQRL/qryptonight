@@ -38,7 +38,7 @@ public:
     bool isValid() { return _context != nullptr; }
     std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
 
-    std::vector<uint8_t> hash(const std::vector<uint8_t>& input) throw(std::invalid_argument);
+    std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
     static void init();

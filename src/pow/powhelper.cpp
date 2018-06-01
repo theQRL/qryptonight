@@ -42,7 +42,7 @@ PoWHelper::PoWHelper(int64_t kp,
 }
 
 std::vector<uint8_t> PoWHelper::getDifficulty(uint64_t measurement,
-                                              const std::vector<uint8_t> &parent_difficulty_vec) throw(std::invalid_argument)
+                                              const std::vector<uint8_t> &parent_difficulty_vec)
 {
     const uint256_t _difficulty_lower_bound = 2;                                // To avoid issues with the target
     const uint256_t _difficulty_upper_bound = std::numeric_limits<uint256_t>::max();
