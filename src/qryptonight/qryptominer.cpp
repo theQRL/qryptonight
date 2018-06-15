@@ -147,7 +147,7 @@ void Qryptominer::setForcedSleep(uint32_t pauseInMilliseconds)
     _pause_milliseconds = pauseInMilliseconds;
 }
 
-void Qryptominer::start(const std::vector<uint8_t>& input,
+uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
         size_t nonceOffset,
         const std::vector<uint8_t>& target,
         uint32_t thread_count)
@@ -232,6 +232,8 @@ void Qryptominer::start(const std::vector<uint8_t>& input,
                   }
                 }, thread_idx, thread_count));
     }
+
+    return _work_sequence_id;
 }
 
 void Qryptominer::_queueEvent(MinerEvent event)

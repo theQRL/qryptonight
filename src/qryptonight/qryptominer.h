@@ -49,7 +49,7 @@ public:
     Qryptominer();
     virtual ~Qryptominer();
 
-    void start(const std::vector<uint8_t>& input,
+    uint64_t start(const std::vector<uint8_t>& input,
             size_t nonceOffset,
             const std::vector<uint8_t>& target,
             uint32_t thread_count = 1);
