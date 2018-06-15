@@ -54,6 +54,8 @@ public:
             const std::vector<uint8_t>& target,
             uint32_t thread_count = 1);
 
+    uint64_t currentSequenceId() { return _work_sequence_id.load(); }
+
     void setTimer(uint32_t stopInMilliseconds);
     void disableTimer();
     uint32_t getSecondsRemaining();

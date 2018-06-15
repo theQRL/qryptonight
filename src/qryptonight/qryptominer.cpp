@@ -153,7 +153,6 @@ uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
         uint32_t thread_count)
 {
     cancel();
-    _work_sequence_id++;
 
     _input = input;
     _nonceOffset = nonceOffset;
@@ -254,6 +253,7 @@ void Qryptominer::cancel()
     }
 
     _runningThreads.clear();
+    _work_sequence_id++;
 }
 
 bool Qryptominer::isRunning()
