@@ -83,7 +83,7 @@ TEST(Qryptominer, Run1Thread)
 
     qm.start(input, 0, target);
 
-    qm.waitForAnswer(20);
+    qm.waitForAnswer(60);
 
     ASSERT_TRUE(qm.solutionAvailable());
 
@@ -169,7 +169,7 @@ TEST(Qryptominer, Run1Thread_bigblob)
     qm.start(input, 0, boundary);
 
     std::cout << "miner started" << std::endl;
-    qm.waitForAnswer(30);
+    qm.waitForAnswer(60);
 
     ASSERT_TRUE(qm.solutionAvailable());
     EXPECT_EQ(50, qm.solutionNonce());
@@ -198,7 +198,7 @@ TEST(Qryptominer, RunAndRestart)
     };
 
     qm.start(input, 0, boundary);
-    qm.waitForAnswer(20);
+    qm.waitForAnswer(60);
 
     ASSERT_TRUE(qm.solutionAvailable());
     EXPECT_EQ(37, qm.solutionNonce());
