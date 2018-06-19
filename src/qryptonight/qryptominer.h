@@ -107,6 +107,7 @@ protected:
     std::atomic<std::uint32_t> _runningThreads_count{0};
 
     std::recursive_timed_mutex _solution_mutex;
+    std::recursive_timed_mutex _event_mutex;
     std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;

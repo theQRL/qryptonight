@@ -244,6 +244,7 @@ void Qryptominer::_queueEvent(MinerEvent event)
 
 void Qryptominer::cancel()
 {
+    std::lock_guard<std::recursive_timed_mutex> lock1(_event_mutex);
     std::lock_guard<std::recursive_timed_mutex> lock2(_runningThreads_mutex);
     _stop_request = true;
 
@@ -267,6 +268,8 @@ std::uint32_t Qryptominer::runningThreadCount()
 
 void Qryptominer::_sendEvent(MinerEvent event)
 {
+    std::lock_guard<std::recursive_timed_mutex> lock(_event_mutex);
+
     if (event.seq!=_work_sequence_id)
         return;
 
