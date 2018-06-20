@@ -68,7 +68,7 @@ public:
     bool isRunning();
     std::uint32_t runningThreadCount();
 
-    virtual void handleEvent(MinerEvent event) { };
+    virtual uint8_t handleEvent(MinerEvent event) { return 1; };
 
     bool solutionAvailable();
     std::vector<uint8_t> solutionInput();
@@ -77,7 +77,7 @@ public:
     uint32_t hashRate();
 
 protected:
-    void _sendEvent(MinerEvent event);
+    uint8_t _sendEvent(MinerEvent event);
     void _queueEvent(MinerEvent event);
 
     void _eventThreadWorker();
@@ -107,6 +107,7 @@ protected:
     std::atomic<std::uint32_t> _runningThreads_count{0};
 
     std::recursive_timed_mutex _solution_mutex;
+    std::recursive_timed_mutex _event_mutex;
     std::recursive_timed_mutex _runningThreads_mutex;
 
     std::future<void> _solution_event;

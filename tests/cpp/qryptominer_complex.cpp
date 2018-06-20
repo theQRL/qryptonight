@@ -30,7 +30,7 @@ namespace {
     class CustomMiner: public Qryptominer
     {
     public:
-        void handleEvent(MinerEvent event) override
+        uint8_t handleEvent(MinerEvent event) override
         {
             if (event.type == SOLUTION)
             {
@@ -39,6 +39,7 @@ namespace {
                 std::this_thread::sleep_for(500ms);
                 cancel();
             }
+            return 1;
         }
     };
 

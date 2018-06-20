@@ -66,7 +66,7 @@ Qryptominer::~Qryptominer()
 {
     cancel();
     {
-        std::lock_guard<std::mutex> lock_queue(_eventQueue_mutex);
+        std::lock_guard<std::mutex> queue_lock(_eventQueue_mutex);
         _stop_eventThread = true;
         _eventReleased.notify_one();
     }
@@ -163,6 +163,8 @@ uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
     _hash_count = 0;
     _hash_per_sec = 0;
 
+    uint64_t current_work_sequence_id = _work_sequence_id.load();
+
     std::lock_guard<std::recursive_timed_mutex> lock_runningThreads(_runningThreads_mutex);
 
     if (thread_count==0) {
@@ -171,7 +173,9 @@ uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
 
     for (uint32_t thread_idx = 0; thread_idx<thread_count; thread_idx++) {
         _runningThreads.emplace_back(
-                std::make_unique<std::thread>([&](uint32_t thread_idx, uint8_t thread_count) {
+                std::make_unique<std::thread>([&]
+                        (uint32_t thread_idx, uint8_t thread_count, uint64_t current_work_sequence_id)
+                {
                   ScopedCounter thread_counter(_runningThreads_count);
 
                   auto qn = _qnpool->acquire();
@@ -201,8 +205,7 @@ uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
                           }
 
                           if (_deadline_enabled && getSecondsRemaining()==0) {
-                              _queueEvent({TIMEOUT,
-                                           _work_sequence_id.load()});
+                              _queueEvent({TIMEOUT, current_work_sequence_id});
                               _stop_request = true;
                               break;
                           }
@@ -219,17 +222,13 @@ uint64_t Qryptominer::start(const std::vector<uint8_t>& input,
                               _solution_found = true;
                               _solution_input = tmp_input;
                               _solution_hash = current_hash;
-
-                              _queueEvent({SOLUTION,
-                                           _work_sequence_id.load(),
-                                           current_nonce,
-                              });
+                              _queueEvent({SOLUTION, current_work_sequence_id, current_nonce});
                           }
                       }
 
                       current_nonce += thread_count;
                   }
-                }, thread_idx, thread_count));
+                }, thread_idx, thread_count, current_work_sequence_id));
     }
 
     return _work_sequence_id;
@@ -244,13 +243,13 @@ void Qryptominer::_queueEvent(MinerEvent event)
 
 void Qryptominer::cancel()
 {
+    std::lock_guard<std::recursive_timed_mutex> lock1(_event_mutex);
     std::lock_guard<std::recursive_timed_mutex> lock2(_runningThreads_mutex);
     _stop_request = true;
 
     for (auto& t : _runningThreads) {
         t->join();
     }
-
     _runningThreads.clear();
     _work_sequence_id++;
 }
@@ -265,17 +264,20 @@ std::uint32_t Qryptominer::runningThreadCount()
     return _runningThreads_count;
 }
 
-void Qryptominer::_sendEvent(MinerEvent event)
+uint8_t Qryptominer::_sendEvent(MinerEvent event)
 {
+    std::lock_guard<std::recursive_timed_mutex> lock(_event_mutex);
+
     if (event.seq!=_work_sequence_id)
-        return;
+        return 1;    // handled
 
     try {
-        handleEvent(event);
+        return handleEvent(event);
     }
     catch (std::exception& e) {
         std::cout << e.what() << std::endl;
     }
+    return 1;
 }
 
 void Qryptominer::_eventThreadWorker()
@@ -290,7 +292,12 @@ void Qryptominer::_eventThreadWorker()
             _eventQueue.pop_front();
             queue_lock.unlock();
             if (event.seq==_work_sequence_id) {
-                _sendEvent(event);
+                if (!_sendEvent(event))
+                {
+                    // if event was not processed, put back in the queue and idle for 100ms
+                    _queueEvent(event);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
             }
         }
         else {
