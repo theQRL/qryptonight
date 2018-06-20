@@ -68,7 +68,7 @@ public:
     bool isRunning();
     std::uint32_t runningThreadCount();
 
-    virtual void handleEvent(MinerEvent event) { };
+    virtual uint8_t handleEvent(MinerEvent event) { return 1; };
 
     bool solutionAvailable();
     std::vector<uint8_t> solutionInput();
@@ -77,7 +77,7 @@ public:
     uint32_t hashRate();
 
 protected:
-    void _sendEvent(MinerEvent event);
+    uint8_t _sendEvent(MinerEvent event);
     void _queueEvent(MinerEvent event);
 
     void _eventThreadWorker();

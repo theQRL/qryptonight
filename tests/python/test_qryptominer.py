@@ -22,6 +22,7 @@ class TestQryptominer(TestCase):
                 if event.type == pyqryptonight.SOLUTION:
                     print("Hey a solution has been found!", event.nonce)
                     self.python_nonce = event.nonce
+                return True
 
         input_bytes = [
             0x03, 0x05, 0x07, 0x09, 0x03, 0x05, 0x07, 0x09,
@@ -68,6 +69,7 @@ class TestQryptominer(TestCase):
                 if event.type == pyqryptonight.SOLUTION:
                     print("Hey a solution has been found!", event.nonce)
                     self.python_nonce = event.nonce
+                return True
 
         input_bytes = [
             0x03, 0x05, 0x07, 0x09, 0x03, 0x05, 0x07, 0x09,
@@ -129,6 +131,7 @@ class TestQryptominer(TestCase):
                 if event.type == pyqryptonight.TIMEOUT:
                     print("Timeout")
                     self.timeout_triggered = True
+                return True
 
         input_bytes = [
             0x03, 0x05, 0x07, 0x09, 0x03, 0x05, 0x07, 0x09,
@@ -174,6 +177,7 @@ class TestQryptominer(TestCase):
                 if event.type == pyqryptonight.TIMEOUT:
                     print("Timeout")
                     self.timeout_triggered = True
+                return True
 
         input_bytes = [
             0x03, 0x05, 0x07, 0x09, 0x03, 0x05, 0x07, 0x09,
@@ -219,6 +223,7 @@ class TestQryptominer(TestCase):
                 if event.type == pyqryptonight.TIMEOUT:
                     print("Timeout")
                     self.timeout_triggered = True
+                return True
 
         input_bytes = [
             0x03, 0x05, 0x07, 0x09, 0x03, 0x05, 0x07, 0x09,
