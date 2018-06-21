@@ -14,10 +14,10 @@ This library (derived from xmr-stak) currently exposes the following functionali
 
 **Platform support**
 
-|           | Linux |     OSX<br>10.12     |  Windows<br>10 | Raspbian<br>? | 
-|-----------|:------------:|:-----------:|:--------:|:--------:|
-|Python 3   | :white_check_mark: | :white_check_mark: |    :white_check_mark:     |     :question:    |
-|Webassembly (JS) |      :question:       |     :question:       |    :question:     |     :question:    |
+|           | Linux |     OSX<br>10.12     |  Windows<br>10 |
+|-----------|:------------:|:-----------:|:--------:|
+|Python 3   | :white_check_mark: | :white_check_mark: |    :white_check_mark:     |
+|Webassembly (JS) |      :question:       |     :question:       |    :question:     |
 |Golang     | - |     -       |    -     |     -    |
 
 ## Installing
