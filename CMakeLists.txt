@@ -12,6 +12,7 @@ set(CMAKE_WARN_DEPRECATED FALSE)
 
 set(BUILD_TESTS ON CACHE BOOL "Enables tests")
 set(BUILD_PYTHON ON CACHE BOOL "Enables python wrapper")
+set(BUILD_GO ON CACHE BOOL "Enables go wrapper")
 set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
 set(SANITIZE_ADDRESS OFF  CACHE BOOL "Enables address sanitizer")
@@ -20,6 +21,7 @@ set(SANITIZE_UNDEFINED  OFF CACHE BOOL "Enables undefined sanitizer")
 
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
 message(STATUS "PYTHON WRAPPER " ${BUILD_PYTHON})
+message(STATUS "GO WRAPPER     " ${BUILD_GO})
 message(STATUS "WEBASSEMBLY    " ${BUILD_WEBASSEMBLY})
 
 if(WIN32)
@@ -279,11 +281,66 @@ if (BUILD_PYTHON)
             ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
             )
 
-    add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
-            POST_BUILD
-            COMMENT ${swig_extra_generated_files}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${swig_extra_generated_files} ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/pyqryptonight.py
+endif ()
+
+## SWIG + API - Go related stuff
+if (BUILD_GO)
+    message(STATUS "GO wrapper enabled")
+
+    unset(CMAKE_SWIG_FLAGS)
+    unset(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+
+    if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    endif ()
+
+    set(language go)
+    set(CMAKE_SWIG_OUTDIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/goqryptonight)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/goqryptonight)
+
+    set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qryptonight.i)
+    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
+    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
+    set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing" "-cgo" "-intgosize" "64" "-c++")
+    message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
+    message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+    # Intentionally use a deprecated version to provide support for the raspberry pi
+    SWIG_ADD_MODULE(goqryptonight
+            ${language}
+            ${SWIG_INTERFACE}
+            ${LIB_QRYPTONIGHT_SRC}
+            ${REF_CRYPTONIGHT_SRC}
             )
+
+    SWIG_LINK_LIBRARIES(goqryptonight
+            ${SWIG_LANG_LIBRARIES}
+            ${REF_CRYPTONIGHT_LIBS}
+            cryptonight-c-lib)
+
+    if(WIN32)
+        swig_link_libraries(goqryptonight wsock32 ws2_32)
+    endif()
+
+    include_directories(
+            ${LIB_QRYPTONIGHT_INCLUDES}
+            ${Boost_INCLUDE_DIRS}
+    )
+
+    set_target_properties(${SWIG_MODULE_goqryptonight_REAL_NAME} PROPERTIES DEBUG_POSTFIX "_d")
+
+    if(WIN32 AND HWLOC_ENABLE)
+        add_custom_command(TARGET ${SWIG_MODULE_goqryptonight_REAL_NAME}
+            POST_BUILD
+            COMMENT "Copying HWLOC DLL to package folder"
+            COMMAND ${CMAKE_COMMAND} -E
+              copy_if_different "${HWLOC_DLL}" "${CMAKE_CURRENT_SOURCE_DIR}/goqryptonight/")
+    endif()
+
+    add_custom_command(TARGET ${SWIG_MODULE_goqryptonight_REAL_NAME}
+        POST_BUILD
+        COMMENT "Updating Go Flags"
+        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/update_go_flags.sh ${CMAKE_CURRENT_SOURCE_DIR})
 
 endif ()
 
