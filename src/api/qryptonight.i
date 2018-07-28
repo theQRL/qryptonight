@@ -11,6 +11,7 @@
 %include "std_shared_ptr.i"
 %include "exception.i"
 
+#if defined(SWIGPYTHON)
 %{
 SWIGEXPORT void HandleAllExceptions()
 {
@@ -41,6 +42,7 @@ SWIGEXPORT void HandleAllExceptions()
         SWIG_fail;
     }
 }
+#endif
 
 %array_class(unsigned char, ucharCArray)
 %array_class(unsigned int, uintCArray)
@@ -84,7 +86,11 @@ namespace std {
     }
 }
 
+#if defined(SWIGPYTHON)
 %module(directors="1") pyqryptonight
+#else
+%module(directors="1") goqryptonight
+#endif
 %{
     #include "pow/powhelper.h"
     #include "misc/strbignum.h"
