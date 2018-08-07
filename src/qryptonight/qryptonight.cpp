@@ -27,6 +27,12 @@
 #include <xmrstak/jconf.hpp>
 #include "qryptonight.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <shellapi.h>
+#include <xmrstak/misc/uac.cpp>
+#endif
+
 Qryptonight::Qryptonight()
 {
     size_t init_res;
