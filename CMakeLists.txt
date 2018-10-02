@@ -30,7 +30,7 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 endif()
 
-if (BUILD_PYTHON)
+if (BUILD_PYTHON OR BUILD_GO)
     find_package(SWIG REQUIRED)
     INCLUDE(${SWIG_USE_FILE})
     unset(SWIG_LANG_TYPE)
