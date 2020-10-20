@@ -12,12 +12,16 @@ set(CMAKE_WARN_DEPRECATED FALSE)
 
 set(BUILD_TESTS ON CACHE BOOL "Enables tests")
 set(BUILD_PYTHON ON CACHE BOOL "Enables python wrapper")
-set(BUILD_GO ON CACHE BOOL "Enables go wrapper")
+set(BUILD_GO OFF CACHE BOOL "Enables go wrapper")
 set(BUILD_WEBASSEMBLY OFF CACHE BOOL "Enables emscripten build")
 
 set(SANITIZE_ADDRESS OFF  CACHE BOOL "Enables address sanitizer")
 set(SANITIZE_THREAD  OFF CACHE BOOL "Enables thread sanitizer")
 set(SANITIZE_UNDEFINED  OFF CACHE BOOL "Enables undefined sanitizer")
+
+if(${CMAKE_VERSION} VERSION_GREATER "3.13")
+    cmake_policy(SET CMP0078 OLD)
+endif()
 
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
 message(STATUS "PYTHON WRAPPER " ${BUILD_PYTHON})
@@ -240,13 +244,25 @@ if (BUILD_PYTHON)
     # Enable threading in the wrapper (useful for GIL-safe callbacks)
     set( CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-threads" )
 
-    # Intentionally use a deprecated version to provide support for the raspberry pi
-    SWIG_ADD_MODULE(pyqryptonight
-            ${language}
-            ${SWIG_INTERFACE}
-            ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
-            )
+    if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.10.3")
+        # Intentionally use a deprecated version to provide support for the raspberry pi
+        SWIG_ADD_MODULE(pyqryptonight
+                ${language}
+                ${SWIG_INTERFACE}
+                ${LIB_QRYPTONIGHT_SRC}
+                ${REF_CRYPTONIGHT_SRC}
+                )
+    else()
+        SWIG_ADD_LIBRARY(pyqryptonight
+                LANGUAGE ${language}
+                OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/
+                OUTFILE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/
+                TYPE MODULE
+                SOURCES ${SWIG_INTERFACE}
+                ${LIB_QRYPTONIGHT_SRC}
+                ${REF_CRYPTONIGHT_SRC}
+                )
+    endif()
 
     SWIG_LINK_LIBRARIES(pyqryptonight
             ${SWIG_LANG_LIBRARIES}
@@ -273,13 +289,15 @@ if (BUILD_PYTHON)
               copy_if_different "${HWLOC_DLL}" "${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/")
     endif()
 
-    add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
-            POST_BUILD
-            COMMENT "Moving SWIG files to output dir"
-            COMMAND ${CMAKE_COMMAND} -E
-            copy_if_different $<TARGET_FILE:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
-            ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
-            )
+    if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.10.3")
+        add_custom_command(TARGET ${SWIG_MODULE_pyqryptonight_REAL_NAME}
+                POST_BUILD
+                COMMENT "Moving SWIG files to output dir"
+                COMMAND ${CMAKE_COMMAND} -E
+                copy_if_different $<TARGET_FILE:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
+                ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/$<TARGET_LINKER_FILE_NAME:${SWIG_MODULE_pyqryptonight_REAL_NAME}>
+                )
+    endif()
 
 endif ()
 
