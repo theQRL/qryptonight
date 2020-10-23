@@ -255,8 +255,8 @@ if (BUILD_PYTHON)
     else()
         SWIG_ADD_LIBRARY(pyqryptonight
                 LANGUAGE ${language}
-                OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/
-                OUTFILE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pyqryptonight/
+                OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+                OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
                 TYPE MODULE
                 SOURCES ${SWIG_INTERFACE}
                 ${LIB_QRYPTONIGHT_SRC}
