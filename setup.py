@@ -9,6 +9,7 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.sysconfig import get_python_inc
 import distutils.sysconfig as sysconfig
+import versioneer
 
 
 class CMakeBuild(build_ext):
@@ -62,6 +63,7 @@ def setup_package():
     setup(setup_requires=['six', 'pyscaffold>=3.0.2'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
+          version=versioneer.get_version(),
           cmdclass=dict(build_ext=CMakeBuild),
           package_data=pkg_data,
           use_pyscaffold=True)
