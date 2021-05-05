@@ -10,6 +10,7 @@ from setuptools.command.build_ext import build_ext
 from distutils.sysconfig import get_python_inc
 import distutils.sysconfig as sysconfig
 import versioneer
+import pkg_resources  # part of setuptools
 
 
 class CMakeBuild(build_ext):
@@ -60,10 +61,15 @@ def setup_package():
     cmake = []
     pkg_data = {'pyqryptonight': ['*.dll']} if sys.platform == 'win32' else {}
 
+    try:
+        version = pkg_resources.require("pyqryptonight")[0].version
+    except:
+        version = versioneer.get_version()
+
     setup(setup_requires=['six', 'pyscaffold>=3.0.2'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
-          version=versioneer.get_version(),
+          version=version,
           cmdclass=dict(build_ext=CMakeBuild),
           package_data=pkg_data,
           use_pyscaffold=True)
