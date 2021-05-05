@@ -26,8 +26,8 @@ class CMakeBuild(build_ext):
             cmake_call = ['cmake', ext.sourcedir,
                           '-DBUILD_PYTHON=ON',
                           '-DBUILD_TESTS=OFF',
-                          '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extension_path,
-                          '-DCMAKE_BUILD_TYPE=Release']
+                          '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extension_path]
+                          #'-DCMAKE_BUILD_TYPE=Release']
 
             # Detect conda
             if sys.platform == 'darwin' and 'CONDA_DEFAULT_ENV' in os.environ:
