@@ -4,7 +4,14 @@
 cmake_minimum_required(VERSION 3.5)
 project(qryptonight)
 
-set(CMAKE_CXX_STANDARD 14)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++-10" CACHE STRING "C compiler" FORCE)
+    set(CMAKE_C_COMPILER "/usr/local/bin/gcc-10" CACHE STRING "C++ compiler" FORCE)
+    set(CMAKE_CXX_STANDARD 17)
+else ()
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_ERROR_DEPRECATED FALSE)
@@ -227,15 +234,30 @@ if (BUILD_PYTHON)
     endif ()
 
     set(language python)
-    find_package(PythonLibs 3.4 REQUIRED)
+    
+    if(${CMAKE_VERSION} VERSION_GREATER "3.12")
+      set(Python_ADDITIONAL_VERSIONS 3 3.7 3.8 3.9 3.6 3.5)
+      find_package(Python COMPONENTS Interpreter Development REQUIRED)
+      message("Python_FOUND:${Python_FOUND}")
+      message("Python_VERSION:${Python_VERSION}")
+      message("Python_Development_FOUND:${Python_Development_FOUND}")
+      message("Python_LIBRARIES:${Python_LIBRARIES}")
+    else ()
+      set(Python_ADDITIONAL_VERSIONS 3 3.6 3.5)
+      find_package(PythonLibs REQUIRED)
+      find_package(PythonInterp REQUIRED)
+      set(Python_INCLUDE_DIRS "${PYTHON_INCLUDE_DIRS}")
+      set(Python_LIBRARIES "${PYTHON_LIBRARIES}")
+    endif ()
+
     include_directories(
-          ${PYTHON_INCLUDE_PATH}
+          ${Python_INCLUDE_DIRS}
     )
     set(CMAKE_SWIG_OUTDIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqryptonight)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pyqryptonight)
 
     set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qryptonight.i)
-    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
+    set(SWIG_LANG_LIBRARIES ${Python_LIBRARIES})
     set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
     set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing")
     message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
@@ -274,7 +296,7 @@ if (BUILD_PYTHON)
     endif()
 
     include_directories(
-            ${PYTHON_INCLUDE_PATH}
+            ${Python_INCLUDE_PATH}
             ${LIB_QRYPTONIGHT_INCLUDES}
             ${Boost_INCLUDE_DIRS}
     )
@@ -317,7 +339,7 @@ if (BUILD_GO)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/goqryptonight)
 
     set(SWIG_INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/api/qryptonight.i)
-    set(SWIG_LANG_LIBRARIES ${PYTHON_LIBRARIES})
+    set(SWIG_LANG_LIBRARIES ${Python_LIBRARIES})
     set_source_files_properties(${SWIG_INTERFACE} PROPERTIES CPLUSPLUS ON)
     set_property(SOURCE ${SWIG_INTERFACE} PROPERTY SWIG_FLAGS "-includeall" "-ignoremissing" "-cgo" "-intgosize" "64" "-c++")
     message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
