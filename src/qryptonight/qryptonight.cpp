@@ -57,6 +57,13 @@ void Qryptonight::init()
         _jconf_initialized = true;
         jconf::inst()->parse_config("", "");
     }
+
+    cn_hash_impl hash_impls[] = {
+        cryptonight_hash<cryptonight_monero, true, false>,
+        cryptonight_hash<cryptonight_monero, false, false>
+    };
+    
+    cn_hash_fn = hash_impls[jconf::inst()->HaveHardwareAes()];
 }
 
 Qryptonight::~Qryptonight()
@@ -79,14 +86,9 @@ std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input)
         throw std::invalid_argument("input length should be > 42 bytes");
     }
 
-    cn_hash_impl hash_impls[] = {
-        cryptonight_hash<cryptonight_monero, true, false>,
-        cryptonight_hash<cryptonight_monero, false, false>
-    };
-
-    hash_impls[jconf::inst()->HaveHardwareAes()](input.data(), input.size(),
-						 output.data(),
-						 _context);
+    cn_hash_fn(input.data(), input.size(),
+	       output.data(),
+	       _context);
 
     return output;
 };

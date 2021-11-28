@@ -38,11 +38,13 @@ public:
     bool isValid() { return _context != nullptr; }
     std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
 
-    typedef void (*cn_hash_impl)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
     std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
-    static void init();
+    typedef void (*cn_hash_impl)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
+    cn_hash_impl cn_hash_fn;
+    
+    void init();
     static std::atomic_bool _jconf_initialized;
 
     alloc_msg _last_msg = { nullptr };
