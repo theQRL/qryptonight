@@ -38,7 +38,12 @@ public:
     bool isValid() { return _context != nullptr; }
     std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
 
-    std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
+    typedef std::vector<uint8_t> (Qryptonight::*cn_hash_fn)(const std::vector<uint8_t>&);
+    
+    template<bool SOFT_AES>
+    std::vector<uint8_t> hash_impl(const std::vector<uint8_t>& input);
+    
+    cn_hash_fn hash;
 
 protected:
     static void init();
