@@ -42,9 +42,9 @@ public:
 
 protected:
     typedef void (*cn_hash_impl)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
-    cn_hash_impl cn_hash_fn;
+    static bool use_hardware_aes;
     
-    void init();
+    static void init();
     static std::atomic_bool _jconf_initialized;
 
     alloc_msg _last_msg = { nullptr };
