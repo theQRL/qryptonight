@@ -49,11 +49,11 @@ Qryptonight::Qryptonight()
 }
 
 std::atomic_bool Qryptonight::_jconf_initialized { false };
-Qryptonight::hash_impl Qryptonight::_hash_fn { NULL };
+Qryptonight::cn_hash_fn Qryptonight::_hash_fn { NULL };
 
 void Qryptonight::init()
 {
-    static const hash_impl hash_impls[] = {
+    static const cn_hash_fn hash_impls[] = {
         cryptonight_hash<cryptonight_monero, true, false>,
         cryptonight_hash<cryptonight_monero, false, false>
     };
@@ -62,7 +62,7 @@ void Qryptonight::init()
     {
         _jconf_initialized = true;
         jconf::inst()->parse_config("", "");
-
+	
 	_hash_fn = hash_impls[jconf::inst()->HaveHardwareAes()];
     }
 }
