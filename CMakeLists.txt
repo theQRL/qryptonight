@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.5)
 project(qryptonight)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++-10" CACHE STRING "C compiler" FORCE)
-    set(CMAKE_C_COMPILER "/usr/local/bin/gcc-10" CACHE STRING "C++ compiler" FORCE)
+    set(CMAKE_CXX_COMPILER "/usr/bin/g++" CACHE STRING "C compiler" FORCE)
+    set(CMAKE_C_COMPILER "/usr/bin/gcc" CACHE STRING "C++ compiler" FORCE)
     set(CMAKE_CXX_STANDARD 17)
 else ()
   set(CMAKE_CXX_STANDARD 14)
@@ -118,14 +118,14 @@ if(WIN32 AND HWLOC_ENABLE)
 endif()
 
 if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
-    set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
+    set(CMAKE_CXX_FLAGS "-mcpu=apple-m1 -mtune=native ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_C_FLAGS "-mcpu=apple-m1 -mtune=native -fPIC ${CMAKE_C_FLAGS}")
 endif()
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/api
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight
 )
 
 file(GLOB LIB_QRYPTONIGHT_INCLUDES
@@ -142,15 +142,15 @@ file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
 file(GLOB REF_CRYPTONIGHT_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/hwlocMemory.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/jconf.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/console.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/utility.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight//*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight/xmrstak/backend/cpu/hwlocMemory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight/xmrstak/jconf.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight/xmrstak/misc/console.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight/xmrstak/misc/utility.cpp
         )
 
 file(GLOB REF_CRYPTONIGHT_C_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c )
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/pycryptonight//*.c )
 
 SET_SOURCE_FILES_PROPERTIES(${LIB_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
 SET_SOURCE_FILES_PROPERTIES(${TEST_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
@@ -159,7 +159,7 @@ SET_SOURCE_FILES_PROPERTIES(${TEST_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
 add_library(cryptonight-c-lib STATIC
         ${REF_CRYPTONIGHT_C_SRC}
         )
-set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)
+set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 11)
 
 if (BUILD_TESTS)
     message(STATUS "GTests enabled")
@@ -205,7 +205,7 @@ if (BUILD_TESTS)
     add_executable(qryptonight_test
             ${TEST_QRYPTONIGHT_SRC}
             ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
+            
             )
 
     target_include_directories( qryptonight_test PRIVATE
@@ -272,7 +272,7 @@ if (BUILD_PYTHON)
                 ${language}
                 ${SWIG_INTERFACE}
                 ${LIB_QRYPTONIGHT_SRC}
-                ${REF_CRYPTONIGHT_SRC}
+                
                 )
     else()
         SWIG_ADD_LIBRARY(pyqryptonight
@@ -282,7 +282,7 @@ if (BUILD_PYTHON)
                 TYPE MODULE
                 SOURCES ${SWIG_INTERFACE}
                 ${LIB_QRYPTONIGHT_SRC}
-                ${REF_CRYPTONIGHT_SRC}
+                
                 )
     endif()
 
@@ -350,7 +350,7 @@ if (BUILD_GO)
             ${language}
             ${SWIG_INTERFACE}
             ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
+            
             )
 
     SWIG_LINK_LIBRARIES(goqryptonight
@@ -393,7 +393,7 @@ if (BUILD_WEBASSEMBLY)
     add_library(jsqryptonight SHARED
             ${JS_QRL_INTERFACE}
             ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
+            
             )
     target_include_directories( jsqryptonight PRIVATE
             ${LIB_QRL_INCLUDES} )
