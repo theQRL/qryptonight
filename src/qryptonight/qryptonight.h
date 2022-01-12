@@ -41,6 +41,10 @@ public:
     std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
+    //Protected variables are prefixed with an underscore
+    typedef void (*cn_hash_fn)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
+    static cn_hash_fn _hash_fn;
+    
     static void init();
     static std::atomic_bool _jconf_initialized;
 
