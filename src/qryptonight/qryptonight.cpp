@@ -21,14 +21,27 @@
   *
   */
 
+#ifndef __arm__
+
 #include <xmrstak/backend/cpu/crypto/cryptonight.h>
 #include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
-#include <iostream>
 #include <xmrstak/jconf.hpp>
+
+#endif
+
+#include <iostream>
 #include "qryptonight.h"
+
+#ifdef __arm__
+
+#include "hash-ops.h"
+
+#endif
 
 Qryptonight::Qryptonight()
 {
+	#ifndef __arm__
+	
     size_t init_res;
     init();
 
@@ -46,13 +59,22 @@ Qryptonight::Qryptonight()
     // If something failed.. go for basic settings
     init_res = cryptonight_init(0, 1, &_last_msg);
     _context = cryptonight_alloc_ctx(0, 1, &_last_msg);
+	
+	#endif
 }
 
 std::atomic_bool Qryptonight::_jconf_initialized { false };
+
+#ifndef __arm__
+
 Qryptonight::cn_hash_fn Qryptonight::_hash_fn { NULL };
+
+#endif
 
 void Qryptonight::init()
 {
+	#ifndef __arm__
+	
     static const cn_hash_fn hash_impls[] = {
         cryptonight_hash<cryptonight_monero, true, false>,
         cryptonight_hash<cryptonight_monero, false, false>
@@ -65,14 +87,20 @@ void Qryptonight::init()
 	
 	_hash_fn = hash_impls[jconf::inst()->HaveHardwareAes()];
     }
+	
+	#endif
 }
 
 Qryptonight::~Qryptonight()
 {
+	#ifndef __arm__
+	
     if (_context!= nullptr)
     {
         cryptonight_free_ctx(_context);
     }
+	
+	#endif
 }
 
 std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input)
@@ -87,9 +115,18 @@ std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input)
         throw std::invalid_argument("input length should be > 42 bytes");
     }
 
+	#ifndef __arm__
+	
     _hash_fn(input.data(), input.size(),
 	    output.data(),
 	    _context);
+		
+	#else
+		
+	cn_slow_hash(input.data(), input.size(), (char*)output.data(), 1, 0, 0);
+	
+	#endif
 
     return output;
 };
+
