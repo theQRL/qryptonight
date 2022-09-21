@@ -54,7 +54,7 @@ public:
 	
 	
     std::string lastError()	{ 
-		#ifndef __arm__
+		#ifdef __arm__
 		    return "";
 		#else
 		    return std::string(_last_msg.warning ? _last_msg.warning : ""); 
