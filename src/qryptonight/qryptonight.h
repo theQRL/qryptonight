@@ -27,29 +27,59 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
 #include <atomic>
+
+#ifdef __arm__
+
+#include "hash-ops.h"
+
+#else
+	
+#include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
+
+#endif
 
 class Qryptonight {
 public:
     Qryptonight();
     virtual ~Qryptonight();
 
-    bool isValid() { return _context != nullptr; }
-    std::string lastError()	{ return std::string(_last_msg.warning ? _last_msg.warning : ""); }
+    bool isValid() { 		
+		#ifdef __arm__
+		return true;
+		#else
+		return _context != nullptr; 
+		#endif
+	}
+	
+	
+    std::string lastError()	{ 
+		#ifndef __arm__
+		    return "";
+		#else
+		    return std::string(_last_msg.warning ? _last_msg.warning : ""); 
+		#endif
+	}
+	
 
     std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
+	#ifndef __arm__
     //Protected variables are prefixed with an underscore
     typedef void (*cn_hash_fn)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
     static cn_hash_fn _hash_fn;
+	#endif
     
     static void init();
     static std::atomic_bool _jconf_initialized;
 
+	#ifndef __arm__
     alloc_msg _last_msg = { nullptr };
     cryptonight_ctx *_context;
+	#endif
 };
 
 #endif //QRYPTONIGHT_QRYPTONIGHT_H
+
+
