@@ -1,3 +1,6 @@
 [submodule "deps/xmr-stak"]
 	path = deps/xmr-stak
 	url = https://github.com/jleni/xmr-stak.git
+[submodule "deps/py-qryptonight"]
+	path = deps/py-qryptonight
+	url = https://github.com/0xFF0/py-qryptonight.git
