@@ -118,15 +118,29 @@ if(WIN32 AND HWLOC_ENABLE)
 endif()
 
 if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
-    set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+        set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
+        set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
+    else ()
+        set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
+        set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
+    endif()
 endif()
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/api
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak
-)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+	include_directories(
+			${CMAKE_CURRENT_SOURCE_DIR}/src/api
+			${CMAKE_CURRENT_SOURCE_DIR}/src
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight		
+	)
+
+else()
+	include_directories(
+			${CMAKE_CURRENT_SOURCE_DIR}/src/api
+			${CMAKE_CURRENT_SOURCE_DIR}/src
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak		
+	)
+endif()
 
 file(GLOB LIB_QRYPTONIGHT_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/qryptonight
@@ -141,16 +155,21 @@ file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
 file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
-file(GLOB REF_CRYPTONIGHT_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/hwlocMemory.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/jconf.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/console.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/utility.cpp
-        )
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+	file(GLOB REF_CRYPTONIGHT_C_SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight/*.c )
+else()
+	file(GLOB REF_CRYPTONIGHT_SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/hwlocMemory.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/jconf.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/console.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/misc/utility.cpp
+			)
 
-file(GLOB REF_CRYPTONIGHT_C_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c )
+	file(GLOB REF_CRYPTONIGHT_C_SRC
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c )
+endif()
 
 SET_SOURCE_FILES_PROPERTIES(${LIB_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
 SET_SOURCE_FILES_PROPERTIES(${TEST_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
@@ -159,7 +178,12 @@ SET_SOURCE_FILES_PROPERTIES(${TEST_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
 add_library(cryptonight-c-lib STATIC
         ${REF_CRYPTONIGHT_C_SRC}
         )
-set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)
+		
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+    set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 11)
+else()
+    set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)
+endif()
 
 if (BUILD_TESTS)
     message(STATUS "GTests enabled")
@@ -202,11 +226,18 @@ if (BUILD_TESTS)
     ###########################
     include(CTest)
 
-    add_executable(qryptonight_test
-            ${TEST_QRYPTONIGHT_SRC}
-            ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
-            )
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+		add_executable(qryptonight_test
+				${TEST_QRYPTONIGHT_SRC}
+				${LIB_QRYPTONIGHT_SRC}
+				)
+	else()
+		add_executable(qryptonight_test
+				${TEST_QRYPTONIGHT_SRC}
+				${LIB_QRYPTONIGHT_SRC}
+				${REF_CRYPTONIGHT_SRC}
+				)	
+	endif()
 
     target_include_directories( qryptonight_test PRIVATE
         ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS})
@@ -267,23 +298,44 @@ if (BUILD_PYTHON)
     set( CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-threads" )
 
     if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.10.3")
+		if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
         # Intentionally use a deprecated version to provide support for the raspberry pi
-        SWIG_ADD_MODULE(pyqryptonight
-                ${language}
-                ${SWIG_INTERFACE}
-                ${LIB_QRYPTONIGHT_SRC}
-                ${REF_CRYPTONIGHT_SRC}
-                )
+			SWIG_ADD_MODULE(pyqryptonight
+					${language}
+					${SWIG_INTERFACE}
+					${LIB_QRYPTONIGHT_SRC}
+					)
+		else()
+			SWIG_ADD_MODULE(pyqryptonight
+					${language}
+					${SWIG_INTERFACE}
+					${LIB_QRYPTONIGHT_SRC}
+					${REF_CRYPTONIGHT_SRC}
+					)
+		
+		endif()
     else()
-        SWIG_ADD_LIBRARY(pyqryptonight
-                LANGUAGE ${language}
-                OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-                OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-                TYPE MODULE
-                SOURCES ${SWIG_INTERFACE}
-                ${LIB_QRYPTONIGHT_SRC}
-                ${REF_CRYPTONIGHT_SRC}
-                )
+		if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+			SWIG_ADD_LIBRARY(pyqryptonight
+					LANGUAGE ${language}
+					OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+					OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+					TYPE MODULE
+					SOURCES ${SWIG_INTERFACE}
+					${LIB_QRYPTONIGHT_SRC}
+					)
+		else()
+			SWIG_ADD_LIBRARY(pyqryptonight
+					LANGUAGE ${language}
+					OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+					OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+					TYPE MODULE
+					SOURCES ${SWIG_INTERFACE}
+					${LIB_QRYPTONIGHT_SRC}
+					${REF_CRYPTONIGHT_SRC}
+					)
+		
+		endif()
     endif()
 
     SWIG_LINK_LIBRARIES(pyqryptonight
@@ -345,13 +397,22 @@ if (BUILD_GO)
     message(STATUS "CMAKE_SWIG_OUTDIR: " ${CMAKE_SWIG_OUTDIR})
     message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY: " ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
     # Intentionally use a deprecated version to provide support for the raspberry pi
-    SWIG_ADD_MODULE(goqryptonight
-            ${language}
-            ${SWIG_INTERFACE}
-            ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
-            )
+		SWIG_ADD_MODULE(goqryptonight
+				${language}
+				${SWIG_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				)
+	else()
+		SWIG_ADD_MODULE(goqryptonight
+				${language}
+				${SWIG_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				${REF_CRYPTONIGHT_SRC}
+				)
+	
+	endif()
 
     SWIG_LINK_LIBRARIES(goqryptonight
             ${SWIG_LANG_LIBRARIES}
@@ -390,11 +451,19 @@ if (BUILD_WEBASSEMBLY)
     set(JS_KYBINTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/jswrapper/jskybwrapper.cpp)
 
     message(STATUS "webassembly enabled")
-    add_library(jsqryptonight SHARED
-            ${JS_QRL_INTERFACE}
-            ${LIB_QRYPTONIGHT_SRC}
-            ${REF_CRYPTONIGHT_SRC}
-            )
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+		add_library(jsqryptonight SHARED
+				${JS_QRL_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				)
+	else()
+		add_library(jsqryptonight SHARED
+				${JS_QRL_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				${REF_CRYPTONIGHT_SRC}
+				)
+	
+	endif()
     target_include_directories( jsqryptonight PRIVATE
             ${LIB_QRL_INCLUDES} )
 
