@@ -1,3 +1,4 @@
 # Add your requirements here like:
 scikit-build
 
+wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
