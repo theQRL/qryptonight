@@ -4,13 +4,13 @@
 cmake_minimum_required(VERSION 3.5)
 project(qryptonight)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++-10" CACHE STRING "C compiler" FORCE)
-    set(CMAKE_C_COMPILER "/usr/local/bin/gcc-10" CACHE STRING "C++ compiler" FORCE)
-    set(CMAKE_CXX_STANDARD 17)
-else ()
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+#if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++" CACHE STRING "C compiler" FORCE)
+#    set(CMAKE_C_COMPILER "/usr/local/bin/gcc" CACHE STRING "C++ compiler" FORCE)
+#    set(CMAKE_CXX_STANDARD 17)
+#else ()
+  set(CMAKE_CXX_STANDARD 17)
+#endif()
 
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)

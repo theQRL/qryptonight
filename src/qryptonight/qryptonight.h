@@ -35,7 +35,7 @@
 
 #else
 	
-#include <xmrstak/backend/cpu/crypto/cryptonight_types.h>
+#include <xmrstak/backend/cpu/crypto/cryptonight.h>
 
 #endif
 
