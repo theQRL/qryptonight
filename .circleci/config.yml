@@ -46,8 +46,9 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: pip3 install PyScaffold
-      - run: python3 setup.py test
+      - run: pip3 install PyScaffold pytest pytest-cov
+      - run: pip3 install -e .
+      - run: python3 -m pytest --cov=qryptonight tests/
 
   deploy-pypi:
     docker:
