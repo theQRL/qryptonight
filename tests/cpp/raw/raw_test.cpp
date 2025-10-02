@@ -24,8 +24,7 @@
 #include <cstdint>
 #include <vector>
 
-// On ARM we use the cryptonight header from py-cryptonight
-#if defined(__arm__) || defined(__aarch64__)
+#if defined(__linux__)
 #include "hash-ops.h"
 #else
 #include "xmrstak/backend/cpu/crypto/cryptonight.h"
