@@ -28,13 +28,9 @@
 #if defined(__arm__) || defined(__aarch64__)
 #include "hash-ops.h"
 #else
-#include "xmrstak/backend/cpu/crypto/cryptonight_types.h"
 #include "xmrstak/backend/cpu/crypto/cryptonight.h"
 #include "xmrstak/backend/cpu/crypto/cryptonight_aesni.h"
-#include "xmrstak/misc/console.hpp"
-#include "xmrstak/backend/cpu/minethd.hpp"
 #include "xmrstak/jconf.hpp"
-#include "hash-ops.h"
 #endif
 
 #include <misc/bignum.h>
