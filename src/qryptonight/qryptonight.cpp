@@ -21,7 +21,7 @@
   *
   */
 
-#ifndef __arm__
+#if !defined(__arm__) && !defined(__aarch64__)
 
 #include <xmrstak/backend/cpu/crypto/cryptonight.h>
 #include <xmrstak/backend/cpu/crypto/cryptonight_aesni.h>
@@ -32,7 +32,7 @@
 #include <iostream>
 #include "qryptonight.h"
 
-#ifdef __arm__
+#if defined(__arm__) || defined(__aarch64__)
 
 #include "hash-ops.h"
 
@@ -40,7 +40,7 @@
 
 Qryptonight::Qryptonight()
 {
-	#ifndef __arm__
+	#if !defined(__arm__) && !defined(__aarch64__)
 	
     size_t init_res;
     init();
@@ -65,7 +65,7 @@ Qryptonight::Qryptonight()
 
 std::atomic_bool Qryptonight::_jconf_initialized { false };
 
-#ifndef __arm__
+#if !defined(__arm__) && !defined(__aarch64__)
 
 Qryptonight::cn_hash_fn Qryptonight::_hash_fn { NULL };
 
@@ -73,7 +73,7 @@ Qryptonight::cn_hash_fn Qryptonight::_hash_fn { NULL };
 
 void Qryptonight::init()
 {
-	#ifndef __arm__
+	#if !defined(__arm__) && !defined(__aarch64__)
 	
     static const cn_hash_fn hash_impls[] = {
         cryptonight_hash<cryptonight_monero, true, false>,
@@ -93,7 +93,7 @@ void Qryptonight::init()
 
 Qryptonight::~Qryptonight()
 {
-	#ifndef __arm__
+	#if !defined(__arm__) && !defined(__aarch64__)
 	
     if (_context!= nullptr)
     {
@@ -115,7 +115,7 @@ std::vector<uint8_t> Qryptonight::hash(const std::vector<uint8_t>& input)
         throw std::invalid_argument("input length should be > 42 bytes");
     }
 
-	#ifndef __arm__
+	#if !defined(__arm__) && !defined(__aarch64__)
 	
     _hash_fn(input.data(), input.size(),
 	    output.data(),
