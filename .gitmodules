@@ -3,4 +3,4 @@
 	url = https://github.com/jplomas/xmr-stak
 [submodule "deps/py-cryptonight"]
 	path = deps/py-cryptonight
-	url = https://github.com/theQRL/py-cryptonight
+	url = https://github.com/jplomas/py-cryptonight
