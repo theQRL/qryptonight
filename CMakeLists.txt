@@ -4,13 +4,13 @@
 cmake_minimum_required(VERSION 3.5)
 project(qryptonight)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++-10" CACHE STRING "C compiler" FORCE)
-    set(CMAKE_C_COMPILER "/usr/local/bin/gcc-10" CACHE STRING "C++ compiler" FORCE)
-    set(CMAKE_CXX_STANDARD 17)
-else ()
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+#if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#    set(CMAKE_CXX_COMPILER "/usr/local/bin/g++" CACHE STRING "C compiler" FORCE)
+#    set(CMAKE_C_COMPILER "/usr/local/bin/gcc" CACHE STRING "C++ compiler" FORCE)
+#    set(CMAKE_CXX_STANDARD 17)
+#else ()
+  set(CMAKE_CXX_STANDARD 17)
+#endif()
 
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -118,7 +118,7 @@ if(WIN32 AND HWLOC_ENABLE)
 endif()
 
 if(NOT WIN32)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64"))
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
     else ()
@@ -127,7 +127,7 @@ if(NOT WIN32)
     endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	include_directories(
 			${CMAKE_CURRENT_SOURCE_DIR}/src/api
 			${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -155,7 +155,7 @@ file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
 file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	file(GLOB REF_CRYPTONIGHT_C_SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight/*.c )
 else()
@@ -179,7 +179,7 @@ add_library(cryptonight-c-lib STATIC
         ${REF_CRYPTONIGHT_C_SRC}
         )
 		
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 11)
 else()
     set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)

@@ -59,3 +59,16 @@ coverage\.xml
 modeling/\.ipynb_checkpoints/
 
 dist/
+
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+install_manifest.txt
+DartConfiguration.tcl
+pyqryptonight/qryptonightPYTHON_wrap.*
+googletest-build/
+googletest-download/
+googletest-src/
+qryptonight_test

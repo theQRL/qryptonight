@@ -66,17 +66,17 @@ namespace {
 
     TEST(Boost_bignum, NaNAssert1) {
         double nan_value = std::nan("0");
-        EXPECT_DEATH( {uint256_t a { nan_value };} , "boost::math::isnan");
+        EXPECT_THROW( {uint256_t a { nan_value };} , std::exception);
     }
 
     TEST(Boost_bignum, NaNAssert2) {
-        EXPECT_DEATH( {uint256_t a { 0./0.  };} , "boost::math::isnan");
+        EXPECT_THROW( {uint256_t a { 0./0.  };} , std::exception);
     }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdiv-by-zero"
     TEST(Boost_bignum, NaNAssert3) {
-        EXPECT_DEATH( {uint256_t a { 1./0 };} , "boost::math::isinf");
+        EXPECT_THROW( {uint256_t a { 1./0 };} , std::exception);
     }
 #pragma GCC diagnostic pop
 

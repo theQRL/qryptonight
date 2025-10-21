@@ -51,9 +51,11 @@ class TestQryptominer(TestCase):
                  thread_count=2)
 
         # Python can sleep or do something else.. the callback will happen in the background
-        time.sleep(5)
-
+        # Use waitForAnswer instead of fixed sleep to ensure we wait until solution is found
+        result = qm.waitForAnswer(30)  # Wait up to 30 seconds for solution
+        
         # This property has been just created in the python custom class when the event is received
+        self.assertTrue(result, "No solution found within timeout")
         self.assertEqual(206, qm.python_nonce)
 
         # Now check wrapper values
