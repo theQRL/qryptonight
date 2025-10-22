@@ -29,7 +29,7 @@
 #include <stdexcept>
 #include <atomic>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 
 #include "hash-ops.h"
 
@@ -45,7 +45,7 @@ public:
     virtual ~Qryptonight();
 
     bool isValid() { 		
-		#if defined(__linux__)
+		#if defined(__linux__) || defined(__APPLE__)
 		return true;
 		#else
 		return _context != nullptr; 
@@ -54,7 +54,7 @@ public:
 	
 	
     std::string lastError()	{ 
-		#if defined(__linux__)
+		#if defined(__linux__) || defined(__APPLE__)
 		    return "";
 		#else
 		    return std::string(_last_msg.warning ? _last_msg.warning : ""); 
@@ -65,7 +65,7 @@ public:
     std::vector<uint8_t> hash(const std::vector<uint8_t>& input);
 
 protected:
-	#if !defined(__linux__)
+	#if !defined(__linux__) && !defined(__APPLE__)
     //Protected variables are prefixed with an underscore
     typedef void (*cn_hash_fn)(const void* input, size_t len, void* output, cryptonight_ctx* ctx0);
     static cn_hash_fn _hash_fn;
@@ -74,7 +74,7 @@ protected:
     static void init();
     static std::atomic_bool _jconf_initialized;
 
-	#if !defined(__linux__)
+	#if !defined(__linux__) && !defined(__APPLE__)
     alloc_msg _last_msg = { nullptr };
     cryptonight_ctx *_context;
 	#endif

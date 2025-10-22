@@ -1,7 +1,7 @@
 # Distributed under the MIT software license, see the accompanying
 # file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10...3.30)
 project(qryptonight)
 
 #if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -28,6 +28,10 @@ set(SANITIZE_UNDEFINED  OFF CACHE BOOL "Enables undefined sanitizer")
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.13")
     cmake_policy(SET CMP0078 OLD)
+endif()
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.30")
+    cmake_policy(SET CMP0167 NEW)
 endif()
 
 message(STATUS "BUILD_TESTS    " ${BUILD_TESTS})
@@ -121,13 +125,16 @@ if(NOT WIN32)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64"))
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+        set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -DMONERO_NO_AES=0")
+        set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -DMONERO_NO_AES=0")
     else ()
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
     endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
 	include_directories(
 			${CMAKE_CURRENT_SOURCE_DIR}/src/api
 			${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -155,7 +162,7 @@ file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
 file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
 	file(GLOB REF_CRYPTONIGHT_C_SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight/*.c )
 else()
@@ -168,7 +175,8 @@ else()
 			)
 
 	file(GLOB REF_CRYPTONIGHT_C_SRC
-			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c )
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/xmr-stak/xmrstak/backend/cpu/crypto/*.c
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight/*.c )
 endif()
 
 SET_SOURCE_FILES_PROPERTIES(${LIB_QRYPTONIGHT_SRC} PROPERTIES LANGUAGE CXX)
@@ -179,11 +187,7 @@ add_library(cryptonight-c-lib STATIC
         ${REF_CRYPTONIGHT_C_SRC}
         )
 		
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 11)
-else()
-    set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 99)
-endif()
+set_property(TARGET cryptonight-c-lib PROPERTY C_STANDARD 11)
 
 if (BUILD_TESTS)
     message(STATUS "GTests enabled")
@@ -231,6 +235,12 @@ if (BUILD_TESTS)
 				${TEST_QRYPTONIGHT_SRC}
 				${LIB_QRYPTONIGHT_SRC}
 				)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+		# On macOS Apple Silicon, use only py-cryptonight (no xmr-stak CPP files)
+		add_executable(qryptonight_test
+				${TEST_QRYPTONIGHT_SRC}
+				${LIB_QRYPTONIGHT_SRC}
+				)
 	else()
 		add_executable(qryptonight_test
 				${TEST_QRYPTONIGHT_SRC}
@@ -240,7 +250,8 @@ if (BUILD_TESTS)
 	endif()
 
     target_include_directories( qryptonight_test PRIVATE
-        ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS})
+        ${LIB_QRYPTONIGHT_INCLUDES} ${Boost_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight)
 
     target_link_libraries(qryptonight_test
             gtest_main
@@ -324,18 +335,28 @@ if (BUILD_PYTHON)
 					SOURCES ${SWIG_INTERFACE}
 					${LIB_QRYPTONIGHT_SRC}
 					)
-		else()
-			SWIG_ADD_LIBRARY(pyqryptonight
-					LANGUAGE ${language}
-					OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-					OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-					TYPE MODULE
-					SOURCES ${SWIG_INTERFACE}
-					${LIB_QRYPTONIGHT_SRC}
-					${REF_CRYPTONIGHT_SRC}
-					)
-		
-		endif()
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+		# On macOS Apple Silicon, use only py-cryptonight (no xmr-stak CPP files)
+		SWIG_ADD_LIBRARY(pyqryptonight
+				LANGUAGE ${language}
+				OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+				OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+				TYPE MODULE
+				SOURCES ${SWIG_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				)
+	else()
+		SWIG_ADD_LIBRARY(pyqryptonight
+				LANGUAGE ${language}
+				OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+				OUTFILE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+				TYPE MODULE
+				SOURCES ${SWIG_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				${REF_CRYPTONIGHT_SRC}
+				)
+	
+	endif()
     endif()
 
     SWIG_LINK_LIBRARIES(pyqryptonight
@@ -351,6 +372,7 @@ if (BUILD_PYTHON)
             ${Python_INCLUDE_PATH}
             ${LIB_QRYPTONIGHT_INCLUDES}
             ${Boost_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight
     )
 
     set_target_properties(${SWIG_MODULE_pyqryptonight_REAL_NAME} PROPERTIES DEBUG_POSTFIX "_d")

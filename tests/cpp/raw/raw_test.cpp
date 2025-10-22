@@ -24,12 +24,13 @@
 #include <cstdint>
 #include <vector>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 #include "hash-ops.h"
 #else
 #include "xmrstak/backend/cpu/crypto/cryptonight.h"
 #include "xmrstak/backend/cpu/crypto/cryptonight_aesni.h"
 #include "xmrstak/jconf.hpp"
+#include "hash-ops.h"
 #endif
 
 #include <misc/bignum.h>
@@ -87,8 +88,8 @@ namespace {
         // xmr-stak (Windows) produces different results  
         std::vector<uint8_t> output_expected;
         
-#if defined(__linux__)
-        // Expected values for Linux (both ARM64 and x86_64 using py-cryptonight)
+#if defined(__linux__) || defined(__APPLE__)
+        // Expected values for Linux/macOS (both ARM64 and x86_64 using py-cryptonight)
         output_expected = {
             0x1d, 0x3d, 0xcf, 0x60, 0x3d, 0x37, 0x01, 0xe3,
             0x82, 0x5f, 0x7b, 0xed, 0x85, 0x54, 0xf4, 0x42,
@@ -115,8 +116,8 @@ namespace {
 
         std::cout << "Cryptonight hash: " << printByteVector(output) << std::endl;
 
-#if defined(__linux__)
-        // For Linux platforms, compare against expected values
+#if defined(__linux__) || defined(__APPLE__)
+        // For Linux/macOS platforms, compare against expected values
         EXPECT_EQ(output_expected, output);
 #else
         // For Windows/other platforms, just verify we get some non-zero output
