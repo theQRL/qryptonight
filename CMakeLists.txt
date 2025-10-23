@@ -125,7 +125,8 @@ if(NOT WIN32)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64"))
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        # macOS (both Intel and ARM) - use march=native without explicit -msse2/-maes
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -DMONERO_NO_AES=0")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -DMONERO_NO_AES=0")
     else ()
@@ -134,11 +135,11 @@ if(NOT WIN32)
     endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	include_directories(
 			${CMAKE_CURRENT_SOURCE_DIR}/src/api
 			${CMAKE_CURRENT_SOURCE_DIR}/src
-			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight		
+			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight
 	)
 
 else()
@@ -162,7 +163,7 @@ file(GLOB_RECURSE LIB_QRYPTONIGHT_SRC
 file(GLOB_RECURSE TEST_QRYPTONIGHT_SRC
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/*.cpp")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	file(GLOB REF_CRYPTONIGHT_C_SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/deps/py-cryptonight/src/cryptonight/*.c )
 else()
@@ -235,8 +236,8 @@ if (BUILD_TESTS)
 				${TEST_QRYPTONIGHT_SRC}
 				${LIB_QRYPTONIGHT_SRC}
 				)
-	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-		# On macOS Apple Silicon, use only py-cryptonight (no xmr-stak CPP files)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# On macOS (both Intel and Apple Silicon), use only py-cryptonight (no xmr-stak CPP files)
 		add_executable(qryptonight_test
 				${TEST_QRYPTONIGHT_SRC}
 				${LIB_QRYPTONIGHT_SRC}
@@ -246,7 +247,7 @@ if (BUILD_TESTS)
 				${TEST_QRYPTONIGHT_SRC}
 				${LIB_QRYPTONIGHT_SRC}
 				${REF_CRYPTONIGHT_SRC}
-				)	
+				)
 	endif()
 
     target_include_directories( qryptonight_test PRIVATE
@@ -335,8 +336,8 @@ if (BUILD_PYTHON)
 					SOURCES ${SWIG_INTERFACE}
 					${LIB_QRYPTONIGHT_SRC}
 					)
-	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-		# On macOS Apple Silicon, use only py-cryptonight (no xmr-stak CPP files)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# On macOS (both Intel and Apple Silicon), use only py-cryptonight (no xmr-stak CPP files)
 		SWIG_ADD_LIBRARY(pyqryptonight
 				LANGUAGE ${language}
 				OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
@@ -426,6 +427,13 @@ if (BUILD_GO)
 				${SWIG_INTERFACE}
 				${LIB_QRYPTONIGHT_SRC}
 				)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# On macOS (both Intel and Apple Silicon), use only py-cryptonight (no xmr-stak CPP files)
+		SWIG_ADD_MODULE(goqryptonight
+				${language}
+				${SWIG_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				)
 	else()
 		SWIG_ADD_MODULE(goqryptonight
 				${language}
@@ -433,7 +441,6 @@ if (BUILD_GO)
 				${LIB_QRYPTONIGHT_SRC}
 				${REF_CRYPTONIGHT_SRC}
 				)
-	
 	endif()
 
     SWIG_LINK_LIBRARIES(goqryptonight
@@ -478,13 +485,18 @@ if (BUILD_WEBASSEMBLY)
 				${JS_QRL_INTERFACE}
 				${LIB_QRYPTONIGHT_SRC}
 				)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		# On macOS (both Intel and Apple Silicon), use only py-cryptonight (no xmr-stak CPP files)
+		add_library(jsqryptonight SHARED
+				${JS_QRL_INTERFACE}
+				${LIB_QRYPTONIGHT_SRC}
+				)
 	else()
 		add_library(jsqryptonight SHARED
 				${JS_QRL_INTERFACE}
 				${LIB_QRYPTONIGHT_SRC}
 				${REF_CRYPTONIGHT_SRC}
 				)
-	
 	endif()
     target_include_directories( jsqryptonight PRIVATE
             ${LIB_QRL_INCLUDES} )
