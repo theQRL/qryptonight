@@ -7,8 +7,8 @@ import platform
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.sysconfig import get_python_inc
-import distutils.sysconfig as sysconfig
+import sysconfig as _sysconfig
+from sysconfig import get_path as _get_path
 import versioneer
 import pkg_resources  # part of setuptools
 
@@ -34,8 +34,8 @@ class CMakeBuild(build_ext):
             # Detect conda
             if sys.platform == 'darwin' and 'CONDA_DEFAULT_ENV' in os.environ:
                 print('OSX + Conda environment detected')
-                python_include_dir = get_python_inc()
-                python_library = os.path.join(sysconfig.get_config_var('LIBDIR'), sysconfig.get_config_var('LDLIBRARY'))
+                python_include_dir = _get_path('include')
+                python_library = os.path.join(_sysconfig.get_config_var('LIBDIR'), _sysconfig.get_config_var('LDLIBRARY'))
                 cmake_call.extend(['-DPYTHON_INCLUDE_DIR=' + python_include_dir,
                                    '-DPYTHON_LIBRARY=' + python_library])
 
@@ -66,7 +66,7 @@ def setup_package():
     except:
         version = versioneer.get_version()
 
-    setup(setup_requires=['six', 'pyscaffold>=3.0.2'] + sphinx + cmake,
+    setup(setup_requires=['pyscaffold>=3.0.2'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
           version=version,
