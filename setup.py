@@ -9,7 +9,13 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sysconfig as _sysconfig
 from sysconfig import get_path as _get_path
-import versioneer
+# versioneer.py is vendored alongside this file. Under PEP 517 the build runs in
+# an isolated environment whose sys.path need not contain the source directory,
+# so make it explicit. The PyPI "versioneer" distribution is a bootstrapper that
+# provides no get_version(), so it must not be declared as a build dependency
+# either -- it would shadow this file and the build would fail.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import versioneer  # noqa: E402
 
 
 class CMakeBuild(build_ext):
