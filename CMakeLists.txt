@@ -122,7 +122,21 @@ if(WIN32 AND HWLOC_ENABLE)
 endif()
 
 if(NOT WIN32)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64"))
+    # ISA baseline.
+    #
+    # -march=native produces binaries that only run on CPUs at least as capable
+    # as the build machine. That is right for a local build and wrong for
+    # anything distributed (PyPI wheels, container images), where the build host
+    # is a CI runner: code tuned for it dies with SIGILL on older hardware.
+    # Default to a portable baseline; a machine-local build can opt back in with
+    # -DQN_ARCH_X86=native / -DQN_ARCH_AARCH64=native.
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        set(QN_ARCH_AARCH64 "armv8-a+crypto" CACHE STRING
+            "AArch64 ISA baseline; use 'native' for a machine-local build")
+        set(CMAKE_CXX_FLAGS "-march=${QN_ARCH_AARCH64} -mtune=generic ${CMAKE_CXX_FLAGS}")
+        set(CMAKE_C_FLAGS "-march=${QN_ARCH_AARCH64} -mtune=generic -fPIC ${CMAKE_C_FLAGS}")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "armv7l")
+        # 32-bit ARM is only ever built locally; left as-is.
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS}")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS}")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -130,8 +144,19 @@ if(NOT WIN32)
         set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -DMONERO_NO_AES=0")
         set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -DMONERO_NO_AES=0")
     else ()
-        set(CMAKE_CXX_FLAGS "-march=native -mtune=native ${CMAKE_CXX_FLAGS} -msse2 -maes")
-        set(CMAKE_C_FLAGS "-march=native -mtune=native -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
+        include(CheckCXXCompilerFlag)
+        check_cxx_compiler_flag("-march=x86-64-v2" QN_HAS_X86_64_V2)
+        if(QN_HAS_X86_64_V2)
+            set(_QN_ARCH_X86_DEFAULT "x86-64-v2")
+        else()
+            # -march=x86-64-v2 needs GCC >= 11 / Clang >= 12; nehalem is the
+            # equivalent baseline understood by older compilers.
+            set(_QN_ARCH_X86_DEFAULT "nehalem")
+        endif()
+        set(QN_ARCH_X86 "${_QN_ARCH_X86_DEFAULT}" CACHE STRING
+            "x86-64 ISA baseline; use 'native' for a machine-local build")
+        set(CMAKE_CXX_FLAGS "-march=${QN_ARCH_X86} -mtune=generic ${CMAKE_CXX_FLAGS} -msse2 -maes")
+        set(CMAKE_C_FLAGS "-march=${QN_ARCH_X86} -mtune=generic -fPIC ${CMAKE_C_FLAGS} -msse2 -maes")
     endif()
 endif()
 
