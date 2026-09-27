@@ -26,7 +26,9 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: cmake -DSANITIZE_THREAD=ON .
+      # clang for TSan: gcc-13's libtsan aborts at startup on runners with
+      # 32-bit mmap randomisation; LLVM >= 18.1 re-execs with ASLR disabled.
+      - run: cmake -DSANITIZE_THREAD=ON -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18 .
       - run: make
       - run: export GTEST_COLOR=1 && ctest -VV
 
