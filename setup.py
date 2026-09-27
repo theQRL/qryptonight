@@ -67,12 +67,14 @@ def setup_package():
     pkg_data = {'pyqryptonight': ['*.dll']} if sys.platform == 'win32' else {}
 
     version = versioneer.get_version()
+    cmdclass = versioneer.get_cmdclass()
+    cmdclass['build_ext'] = CMakeBuild
 
     setup(setup_requires=['pyscaffold>=3.0.2'] + sphinx + cmake,
           packages=['pyqryptonight', ],
           ext_modules=[CMakeExtension('pyqryptonight')],
           version=version,
-          cmdclass=dict(build_ext=CMakeBuild),
+          cmdclass=cmdclass,
           package_data=pkg_data,
           use_pyscaffold=True)
 
